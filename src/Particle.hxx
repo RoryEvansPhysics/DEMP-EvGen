@@ -8,8 +8,18 @@ Includes: TLorentz vector with momenta information.
 #ifndef Particle_H
 #define Particle_H
 
-class Particle : public TLorentzVector
+#include "TLorentzVector.h"
+
+class Particle:public TLorentzVector
 {
   int pid;
-}
+  int charge;
+  double mass;
+
+public:
+  int GetPid();
+  int GetCharge();
+  double GetMass();
+  
+};
 #endif
