@@ -20,6 +20,9 @@ public:
   int GetPid();
   int GetCharge();
   double GetMass();
+  void SetPid(int x);
+  void SetCharge(int x);
+  void SetMass(double x);
   
 };
 #endif
