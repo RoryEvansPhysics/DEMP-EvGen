@@ -21,6 +21,7 @@ public:
   int GetPid();
   int GetCharge();
   double GetMass();
+
   void SetPid(int x);
   void SetCharge(int x);
   void SetMass(double x);
@@ -33,5 +34,17 @@ public:
   double GetVy();
   double GetVz();
 
+  int Complete(Particle a, Particle b);
+                     // Set particle momentum to sum zero with
+                     // the supplied particle
+                     // (i.e. p_this + p_a + P_b = 0
+
+  Particle(double m, double px, double py, double pz);
+
+  Particle(double m, TVector3& v);
+
+  Particle(double m, Particle a, Particle b);
+
+  Particle():TLorentzVector(){}
 };
 #endif

@@ -3,6 +3,7 @@ Implementation of Particle class. See Particle.hxx
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 #include "Particle.hxx"
+#include "TVector3.h"
 
 int Particle::GetPid()
 {
@@ -51,4 +52,32 @@ void Particle::SetVy(double x)
 void Particle::SetVz(double x)
 {
   vz = x;
+}
+
+int Particle::Complete(Particle a, Particle b)
+{
+  TVector3 pa = a.Vect();
+  TVector3 pb = b.Vect();
+  TVector3 p0(0,0,0);
+  TVector3 pthis = p0 - (pa+pb);
+  SetVectM(pthis, mass);
+}
+
+Particle::Particle(double m, double px, double py, double pz)
+{
+  TVector3 v(px,py,pz);
+  SetVectM(v, m);
+  mass = m;
+}
+
+Particle::Particle(double m, TVector3& v)
+{
+  SetVectM(v,m);
+  mass = m;
+}
+
+Particle::Particle(double m, Particle a, Particle b)
+{
+  mass = m;
+  Complete(a,b);
 }

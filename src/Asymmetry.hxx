@@ -16,40 +16,41 @@ class Asymmetry
 {
 private:
 
-  char * root_filepath; // Name of .root file with Raws and/or
-  // parameters
-  char * AsyNameStr;    // Name of asymmetry
-  // (must match branch name)
+  char * root_filepath;     // Name of .root file with Raws and/or
+                            // parameters
+  char * AsyNameStr;        // Name of asymmetry
+                            // (must match branch name)
 
-  int nQsq;                   // Number of Qsq values
-  vector<double> Qsq;         // Qsq values
-  vector<TF1*> AsyFunction;   // Asymmetry Functions
+  int nQsq;                 // Number of Qsq values
+  vector<double> Qsq_Vec;   // Qsq values
+  vector<TF1*> AsyFunction; // Asymmetry Functions
 
-  char * FuncForm;            // General form of function to fit data
+  char * FuncForm;          // General form of function to fit data
 
-  int nPars;                  // Number of pars in fitting function
+  int nPars;                // Number of pars in fitting function
 
 
-  double Extrap(double x1, double x2, double y1, double y2);
-  // Extrapolation function
+  double Extrap(double x0, double x1, double x2,
+                double y1, double y2);
+                            // Extrapolation function
 
 public:
   Asymmetry(char * in_AsyName, char * in_Func,
             vector<double> in_Qsq = vector<double>(),
             bool refit = true);
 
-  int SetPars();             // Set Pars from file
+  int SetPars();            // Set Pars from file
 
-  int Parameterize();         // Set pars from fitting
+  int Parameterize();       // Set pars from fitting
 
   int Parameterize(vector<double> in_Qsq);
-  // Use only specified Qsq values
+                            // Use only specified Qsq values
 
-  // double GetAsy(double qsq, double tp);
-  // Return asymmetry amplitude
+  double GetAsyAmp(double Qsq, double tp);
+                            // Return asymmetry amplitude
 
   // void SetFunc(const string& fitfunc, int n);
-  // Sets the fitting function from string
+                            // Sets the fitting function from string
 
 
 
