@@ -4,8 +4,6 @@ Implementation of Particle class. See Particle.hxx
 
 #include "Particle.hxx"
 
-
-
 int Particle::GetPid()
 {
   return pid;
@@ -42,15 +40,15 @@ double Particle::GetVz()
 {
   return vz;
 }
-void SetVx(double x)
+void Particle::SetVx(double x)
 {
   vx = x;
 }
-void SetVy(double x)
+void Particle::SetVy(double x)
 {
   vy = x;
 }
-void SetVz(double x)
+void Particle::SetVz(double x)
 {
   vz = x;
 }

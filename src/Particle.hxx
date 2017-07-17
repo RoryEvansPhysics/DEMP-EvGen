@@ -15,6 +15,7 @@ class Particle:public TLorentzVector
   int pid;
   int charge;
   double mass;
+  double vx, vy, vz;
 
 public:
   int GetPid();
@@ -23,6 +24,14 @@ public:
   void SetPid(int x);
   void SetCharge(int x);
   void SetMass(double x);
-  
+
+  void SetVx(double x);
+  void SetVy(double x);
+  void SetVz(double x);
+
+  double GetVx();
+  double GetVy();
+  double GetVz();
+
 };
 #endif

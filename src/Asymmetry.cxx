@@ -1,6 +1,6 @@
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Asymmetry class implementation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+  Asymmetry class implementation
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 #include "Asymmetry.hxx"
 
@@ -20,73 +20,86 @@ Asymmetry class implementation
 using namespace std;
 using namespace TMath;
 
-extern TFile WorkFile;
+extern TFile * WorkFile;
+TTree * GK_Raw;
 
-Asymmetry::Asymmetry(char * AsyName_in, char * Func_in)//,
-		     // double in_Qsq[] = {}, bool refit = false)
+Asymmetry::Asymmetry(char * in_AsyName, char * in_Func,
+                     vector<double> in_Qsq, bool refit)
 {
-  double in_Qsq[] = {4.107, 4.335};
-  bool refit = true;
-  AsyNameStr = AsyName_in;
-  FuncForm = Func_in;
+  AsyNameStr = in_AsyName;
+  FuncForm = in_Func;
   if (refit) Parameterize(in_Qsq);
   else SetPars();
-  
 }
 
-int Asymmetry::Parameterize(double in_Qsq[])
+int Asymmetry::Parameterize(vector<double> in_Qsq)
 {
-  nQsq = sizeof(in_Qsq)/sizeof(in_Qsq[0]);
+  //Go to default work file if not extern not available
+  if (WorkFile->IsZombie()){
+    WorkFile = new TFile("../output/test.root");
+    cout << "File Opened" << endl;
+  }
+
+  GK_Raw = (TTree*)WorkFile->Get("GK_Raw");
+
+  nQsq = in_Qsq.size();
   if (nQsq == 0) {
     return Parameterize();
   }
 
-  //Go to default work file if not extern not available
-  if (WorkFile.IsZombie())
-    WorkFile.Open("../Output/test.root");
-  
-  TTree *GK_Raw = (TTree*)WorkFile.Get("GK_Raw");
-  
+  else{
+    Qsq = in_Qsq;
+    cout << nQsq << endl;
+  }
+
   char tfnamestr[100] = "%s%i";
   char plotstr[100] = "tp:%s";
-  char cutstr[100] = "Qsq==%d";
+  char cutstr[100] = "q2==%g";
 
-  
   int i = 0;
   char tempname1[100];
   char tempname2[100];
   char tempname3[100];
-
   TGraph *gtemp;
-  
+
   for (i = 0; i < nQsq; i++){
-    Qsq[i] = in_Qsq[i];
 
-    sprintf(tempname1, tfnamestr, AsyNameStr.c_str(), i);
-    cout << tempname1 << endl;
-    AsyFunction[i] =  TF1(tempname1, FuncForm.c_str());
+    cout << Qsq[i] << endl;
 
-    sprintf(tempname2, plotstr, AsyNameStr.c_str());
+    sprintf(tempname1, tfnamestr, AsyNameStr, i);
+    AsyFunction.push_back(new TF1(tempname1, FuncForm));
+    sprintf(tempname2, plotstr, AsyNameStr);
+    cout << tempname2 << endl;
     sprintf(tempname3, cutstr, Qsq[i]);
 
-    int n = GK_Raw->Draw(plotstr, cutstr, "goff");
+    int n = GK_Raw->Draw(tempname2, tempname3, "goff");
 
     gtemp = new TGraph(n, GK_Raw->GetV1(), GK_Raw->GetV2());
     gtemp -> Fit(tempname1);
-    
   }
 
   return 0;
 
-  
-  
 
-  
 }
 
 int Asymmetry::Parameterize()
 {
-  cout << "Warning: Not yet Implemented" << endl;
-  cout << "Please supply Qsq values" << endl;
+  int n_all_Qsq = GK_Raw->Draw("q2","","goff");
+  double * all_Qsq = GK_Raw->GetV1();
+  Qsq = *(new vector<double>(all_Qsq, all_Qsq + n_all_Qsq));
+  sort(Qsq.begin(), Qsq.end());
+  vector<double>::iterator it = unique(Qsq.begin(), Qsq.end());
+  Qsq.resize(distance(Qsq.begin(), it));
+  nQsq = Qsq.size();
+  Parameterize(Qsq);
+  cout << nQsq << endl;
+  return 0;
+}
+
+int Asymmetry::SetPars()
+{
+  cout << "WARNING: Not Implemented" << endl;
+  cout << "Use Parameterize" << endl;
   return 1;
 }
