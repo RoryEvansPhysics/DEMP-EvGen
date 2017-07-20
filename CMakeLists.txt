@@ -18,3 +18,4 @@ include_directories(${ROOT_INCLUDE_DIRS})
 file(GLOB SOURCES "src/*.cxx")
 
 add_executable (main ${SOURCES})
+target_link_libraries(main ${ROOT_LIBRARIES})

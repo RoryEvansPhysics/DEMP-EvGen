@@ -42,4 +42,6 @@ GPATH
 # ROOT (?) stuff
 *.pcm
 
+# misc
 build/
+.dir-locals.el
