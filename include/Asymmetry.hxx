@@ -12,6 +12,8 @@
 #include <vector>
 #include "TF1.h"
 
+using namespace std;
+
 class Asymmetry
 {
 private:

@@ -1,6 +1,10 @@
-# Emacs Crap #
+# Emacs Stuff #
 *~
 *\#
+GPATH
+GRTAGS
+GTAGS
+GPATH
 
 # Prerequisites
 *.d
@@ -37,3 +41,5 @@
 
 # ROOT (?) stuff
 *.pcm
+
+build/
