@@ -1,9 +1,9 @@
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Class to contain all information on each particle in the event.
-Includes: TLorentz vector with momenta information.
-          Charge, PID, etc.
-	  Access functions for E, theta, etc.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+  Class to contain all information on each particle in the event.
+  Includes: TLorentz vector with momenta information.
+  Charge, PID, etc.
+  Access functions for E, theta, etc.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 #ifndef Particle_H
 #define Particle_H
@@ -35,9 +35,9 @@ public:
   double GetVz();
 
   int Complete(Particle a, Particle b);
-                     // Set particle momentum to sum zero with
-                     // the supplied particle
-                     // (i.e. p_this + p_a + P_b = 0
+  // Set particle momentum to sum zero with
+  // the supplied particle
+  // (i.e. p_this + p_a + P_b = 0
 
   Particle(double m, double px, double py, double pz);
 

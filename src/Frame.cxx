@@ -1,7 +1,7 @@
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   Frame Class
   Contains three Particle objects
-  Currently just a prototype
+ Currently just a prototype
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 #include "Frame.hxx"
@@ -28,3 +28,4 @@ Frame* Frame::RandFrame()
 
   return F;
 }
+
