@@ -8,9 +8,12 @@
 #include "TF1.h"
 #include "TF2.h"
 #include "TF3.h"
+#include "TRandom3.h"
 
 class CustomRand
 {
+  TRandom3 * r;
+
   TF1 * PhiRand;
   TF1 * ThetaRand;
   TF1 * ERand;

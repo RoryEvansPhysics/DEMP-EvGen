@@ -17,3 +17,6 @@ The  Event class (planned) contains all Frames of interest. This class is where 
 
 The Asymmetry class calculates asymmetry amplitudes based on Monte-Carlo data by Goloskokov and Kroll. The asymmetry objects are persistent between events.
 
+## Customrand Class
+
+A class to hold various distribution functions for randomly generated variables, such as scattered electron energy. These functions should be persistent between events, and will provide fast random numbers.
