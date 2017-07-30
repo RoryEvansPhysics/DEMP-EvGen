@@ -15,6 +15,7 @@
 #include "Particle.hxx"
 #include "Frame.hxx"
 #include "CustomRand.hxx"
+#include "ScatteredParticleGen.hxx"
 
 using namespace std;
 
@@ -33,24 +34,24 @@ int main(){
 
   Particle * ScatElectron;
 
+  double elecMassMeV = 0.511;
   double elecERange[2] = {0.1*beamE_MeV,0.9*beamE_MeV};
   double elecThetaRange[2] = {5/DEG, 25/DEG};
   double elecPhiRange[2] = {0, 360/DEG};
-  char elecRName[100] = "RandElec";
 
-  CustomRand *RandElec = new CustomRand(elecRName,
-                                        elecERange,
-                                        elecThetaRange,
-                                        elecPhiRange);
+  ScatteredParticleGen * ElecGen =
+    new ScatteredParticleGen(elecMassMeV,
+                             elecERange,
+                             elecThetaRange,
+                             elecPhiRange);
 
   for (int i=0; i<nEvents; i++){
-    cout << RandElec->E()
-         << '\t'
-         << RandElec->Theta()*DEG
-         << '\t'
-         << RandElec->Phi()*DEG
+    ScatElectron = ElecGen->GetParticle();
+    cout << ScatElectron->Px() << '\t'
+         << ScatElectron->Py() << '\t'
+         << ScatElectron->Pz() << '\t'
          << endl;
-  }
+      }
 
   return 0;
 }

@@ -8,7 +8,8 @@
 #include <stdio.h>
 
 CustomRand::CustomRand(char * fname,
-                       double ERange[2], double ThetaRange[2],
+                       double ERange[2],
+                       double ThetaRange[2],
                        double PhiRange[2])
 {
   PartSet = true;
@@ -23,12 +24,12 @@ CustomRand::CustomRand(char * fname,
 
   char ThetaName[100] = "Theta_%c";
   std::sprintf(ThetaName, ThetaName, fname);
-  //double ThetaMin = ThetaRange[0]*TMath::Pi()/180;
-  //double ThetaMax = ThetaRange[1]*TMath::Pi()/180;
-  ThetaRand = new TF1(ThetaName, "1",
-                      TMath::Cos(ThetaRange[0]),
-                      TMath::Cos(ThetaRange[1]));
 
+  // ThetaRand = new TF1(ThetaName, "1",
+  //                     TMath::Cos(ThetaRange[0]),
+  //                     TMath::Cos(ThetaRange[1]));
+
+  ThetaRand = new TF1(ThetaName, "0.5*sin(x)", ThetaRange[0], ThetaRange[1]);
 
   char EName[100] = "E_%c";
   std::sprintf(EName, EName, fname);
@@ -42,7 +43,7 @@ double CustomRand::Phi()
 }
 double CustomRand::Theta()
 {
-  return TMath::ACos(ThetaRand->GetRandom());
+  return ThetaRand->GetRandom();
 
 }
 double CustomRand::E()
