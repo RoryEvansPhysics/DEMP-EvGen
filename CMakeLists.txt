@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.0)
 project(DEMP-EvGen)
 
 set (DEMP-EvGen_VERSION_MAJOR 0)
@@ -16,6 +16,9 @@ include_directories(include)
 include_directories(${ROOT_INCLUDE_DIRS})
 
 file(GLOB SOURCES "src/*.cxx")
+
+message("Root Include Dirs: " ${ROOT_INCLUDE_DIRS})
+message("Root Libraries: " ${ROOT_LIBRARIES})
 
 add_executable (main ${SOURCES})
 target_link_libraries(main ${ROOT_LIBRARIES})
