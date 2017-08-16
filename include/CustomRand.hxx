@@ -32,6 +32,7 @@ class CustomRand
   CustomRand(char * fname,
              double VRange[6]);
 
+
   /* CustomRand(double ERange[2], double PhiRange[2], */
   /*            bouble PhiRange[2], */
   /*            double VRange[6]); */

@@ -16,7 +16,10 @@ CustomRand::CustomRand(char * fname,
 
   int seed = 0;
 
-  r = new TRandom3(seed);
+  if(gRandom) delete gRandom;
+  gRandom = new TRandom3(0);
+
+  gRandom -> SetSeed(0);
 
   char PhiName[100] = "Phi_%c";
   std::sprintf(PhiName, PhiName, fname);

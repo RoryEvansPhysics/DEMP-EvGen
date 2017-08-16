@@ -16,6 +16,7 @@
 #include "Frame.hxx"
 #include "CustomRand.hxx"
 #include "ScatteredParticleGen.hxx"
+#include "ProductGen.hxx"
 
 using namespace std;
 
@@ -44,14 +45,40 @@ int main(){
                              elecERange,
                              elecThetaRange,
                              elecPhiRange);
+  Particle * BeamParticle =
+    new Particle(0.511, 0, 0, beamE_MeV);
+
+  Particle * TargetParticle =
+    new Particle(940, 0, 0, 0);
+
+  ProductGen * ProtonPionGen = new ProductGen();
+  ProtonPionGen->SetIncident(BeamParticle);
+  ProtonPionGen->SetTarget(TargetParticle);
+
+  Particle * ProdProton;
+  Particle * ProdPion;
 
   for (int i=0; i<nEvents; i++){
     ScatElectron = ElecGen->GetParticle();
-    cout << ScatElectron->Px() << '\t'
-         << ScatElectron->Py() << '\t'
-         << ScatElectron->Pz() << '\t'
-         << endl;
+    // cout << ScatElectron->Px() << '\t'
+    //      << ScatElectron->Py() << '\t'
+    //      << ScatElectron->Pz() << '\t'
+    //      << endl;
+    ProtonPionGen->Solve(ScatElectron);
+    //ProtonPionGen->PrintPars();
+    ProdPion = ProtonPionGen->ProdPion();
+    ProdProton = ProtonPionGen->ProdProton();
+
+    //    ProtonPionGen->PrintPars();
+
+    cout << "Initial Energy: "
+      << BeamParticle->E()+TargetParticle->E() << endl
+      << "Final Energy: "
+      << ProdPion->E()+ProdProton->E()+ScatElectron->E() << endl
+      << "Difference: "
+      << BeamParticle->E()+TargetParticle->E() -
+      (ProdPion->E()+ProdProton->E()+ScatElectron->E()) << endl;
       }
 
-  return 0;
+      return 0;
 }
