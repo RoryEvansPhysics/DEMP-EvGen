@@ -5,6 +5,7 @@
 #include "CustomRand.hxx"
 
 #include "TF1.h"
+#include "TVector3.h"
 
 #include <vector>
 
@@ -14,29 +15,45 @@ using namespace std;
 class ProductGen
 {
 
-  double StepSize;
-  double WTol;
+  const double StepSize=0.001;
+  const double MTol=0.01; //As fraction of M_p
+  const double Start=0.01; //As fraction of photon P
+  const double End=0.99; //"
+
+  double W_in_val;
 
   Particle * Target;
-  Particle * Incident;
-  Particle * Scattered;
+  Particle * Interaction;
+  Particle * Initial;
 
   Particle * Proton;
   Particle * Pion;
+  Particle * Final;
 
   CustomRand * AngleGen;
+  TRandom3 * CoinToss;
 
+  TF1 * F;
+  TVector3 * UnitVect;
 
-  double Qsq();
-  double W();
+  double Qsq_in();
+  double W_in();
+
+  double W_out();
+
+  bool SolnCheck();
 
 public:
-  ProductGen();
+  ProductGen(Particle* inInteraction, Particle* inTarget);
 
-  void SetIncident(Particle * inIncident);
+  void SetInteraction(Particle * inInteraction);
   void SetTarget(Particle * inTarget);
 
-  void Solve(Particle * inScattered);
+  int Solve();
+
+  int TestSolve();
+
+  int SolveAnalytic();
 
   Particle * ProdPion();
   Particle * ProdProton();

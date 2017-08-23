@@ -9,6 +9,7 @@
 class ScatteredParticleGen{
   CustomRand * Rand;
   double mass;
+  Particle * ScatteredParticle;
 
 public:
   Particle* GetParticle();

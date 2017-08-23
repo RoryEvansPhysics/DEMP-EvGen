@@ -12,12 +12,15 @@
 
 class Particle:public TLorentzVector
 {
-  int pid;
-  int charge;
-  double mass;
   double vx, vy, vz;
 
+  char * identifier;
+
 public:
+  int pid;
+  int charge;
+  double proper_mass;
+
   int GetPid();
   int GetCharge();
   double GetMass();
@@ -34,6 +37,8 @@ public:
   double GetVy();
   double GetVz();
 
+  double Pmag();
+
   int Complete(Particle a, Particle b);
   // Set particle momentum to sum zero with
   // the supplied particle
@@ -46,5 +51,13 @@ public:
   Particle(double m, Particle a, Particle b);
 
   Particle():TLorentzVector(){}
+
+  Particle operator + (const Particle& q);
+  Particle operator - (const Particle& q);
+  Particle operator = (const Particle& q);
+
+  char * GetName();
+  void SetName(char * name);
+
 };
 #endif

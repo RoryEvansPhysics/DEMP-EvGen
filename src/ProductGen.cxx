@@ -10,146 +10,17 @@
 
 #include "ProductGen.hxx"
 #include "CustomRand.hxx"
+#include "Constants.hxx"
 
 #include "TMath.h"
-
-#include "RConfigure.h"
-#ifndef R__HAS_MATHMORE
-#error MathMore not installed. Rebuild root with GSL and MathMore.
-#else
-#include "Math/MultiRootFinder.h"
-#include "Math/WrappedMultiTF1.h"
-#endif
+#include "TRandom3.h"
 
 using namespace std;
+using namespace constants;
 
-double ProductGen::PconsX(double * x, double * p)
+ProductGen::ProductGen(Particle* inInteraction, Particle* inTarget):
+  Interaction(inInteraction), Target(inTarget)
 {
-  return (p[0]+p[2])-(p[1]+x[0]+x[1]);
-}
-
-double ProductGen::PconsY(double * x, double * p)
-{
-  return (p[3]+p[5])-(p[4]+x[2]+p[3]);
-}
-
-double ProductGen::PconsZ(double * x, double * p)
-{
-  return (p[6]+p[8])-(p[7]+x[4]+x[5]);
-}
-
-double ProductGen::Econs(double * x, double * p)
-{
-  double Ee = TMath::Sqrt(p[0]*p[0]+p[3]*p[3]+p[6]*p[6]+p[9]*p[9]);
-  double Eep= TMath::Sqrt(p[1]*p[1]+p[4]*p[4]+p[7]*p[7]+p[9]*p[9]);
-  double Epi= TMath::Sqrt(x[0]*x[0]+x[2]*x[2]+x[4]*x[4]+p[10]*p[10]);
-  double Ep = TMath::Sqrt(x[1]*x[1]+x[3]*x[3]+x[5]*x[5]+p[11]*p[11]);
-  double En = TMath::Sqrt(p[2]*p[2]+p[5]*p[5]+p[8]*p[8]+p[12]*p[12]);
-  //cout << p[6] << endl;
-  return (Ee + En) - (Eep + Epi + Ep);
-}
-
-double ProductGen::AngleTheta(double * x, double * p)
-{
-  double Ppi = TMath::Sqrt(x[0]*x[0]+x[2]*x[2]+x[4]*x[4]);
-  return Ppi*TMath::Cos(p[13]) - x[0];
-}
-
-double ProductGen::AnglePhi(double * x, double * p)
-{
-  return x[0]*TMath::Tan(p[14]) - x[2];
-}
-
-double ProductGen::W(double * x, double * p)
-{
-  double Ee = TMath::Sqrt(p[0]*p[0]+p[3]*p[3]+p[6]*p[6]+p[9]*p[9]);
-  double Eep= TMath::Sqrt(p[1]*p[1]+p[4]*p[4]+p[7]*p[7]+p[9]*p[9]);
-  double Epi= TMath::Sqrt(x[0]*x[0]+x[2]*x[2]+x[4]*x[4]+p[10]*p[10]);
-  double Ep = TMath::Sqrt(x[1]*x[1]+x[3]*x[3]+x[5]*x[5]+p[11]*p[11]);
-  double En = TMath::Sqrt(p[2]*p[2]+p[5]*p[5]+p[8]*p[8]+p[12]*p[12]);
-  return TMath::Power(p[0]-p[1]+p[2],2)
-    +TMath::Power(p[3]-p[4]+p[5],2)
-    +TMath::Power(p[6]-p[7]+p[8],2)
-    -TMath::Power(Ee-Eep+En,2)
-    -(TMath::Power(x[0]+x[1],2)
-      +TMath::Power(x[2]+x[3],2)
-      +TMath::Power(x[4]+x[5],2)
-      -TMath::Power(Epi+Ep,2));
-}
-
-double ProductGen::T(double * x, double * p)
-{
-  double Ee = TMath::Sqrt(p[0]*p[0]+p[3]*p[3]+p[6]*p[6]+p[9]*p[9]);
-  double Eep= TMath::Sqrt(p[1]*p[1]+p[4]*p[4]+p[7]*p[7]+p[9]*p[9]);
-  double Epi= TMath::Sqrt(x[0]*x[0]+x[2]*x[2]+x[4]*x[4]+p[10]*p[10]);
-  double Ep = TMath::Sqrt(x[1]*x[1]+x[3]*x[3]+x[5]*x[5]+p[11]*p[11]);
-  double En = TMath::Sqrt(p[2]*p[2]+p[5]*p[5]+p[8]*p[8]+p[12]*p[12]);
-  return TMath::Power(p[0]-p[1]-x[0],2)
-    +TMath::Power(p[3]-p[4]-x[2],2)
-    +TMath::Power(p[6]-p[7]-x[4],2)
-    -TMath::Power(Ee-Eep-Epi,2)
-    -(TMath::Power(x[1]-p[2],2)
-      +TMath::Power(x[3]-p[5],2)
-      +TMath::Power(x[5]-p[8],2)
-      -TMath::Power(Ep-En,2));
-}
-
-ProductGen::ProductGen()
-{
-  TF1 * fPconsX = new TF1("fPconsX", this->PconsX, 0, 100000, 15);
-  TF1 * fPconsY = new TF1("fPconsY", this->PconsY, 0, 100000, 15);
-  TF1 * fPconsZ = new TF1("fPconsZ", this->PconsZ, 0, 100000, 15);
-
-  TF1 * fEcons = new TF1("fEcons", Econs, 0, 100000, 15);
-
-  TF1 * fAngleTheta = new TF1("fAngleTheta", this->AngleTheta, 0, 1000, 15);
-  TF1 * fAnglePhi = new TF1("fAnglePhi", this->AnglePhi, 0, 1000, 15);
-  TF1 * fW = new TF1("fW",this->W, 0, 1000, 15);
-
-  TF1 * fT = new TF1("fT",this->T,0,1000,15);
-
-  EqnSys.push_back(*fPconsX);
-  EqnSys.push_back(*fPconsY);
-  EqnSys.push_back(*fPconsZ);
-
-  EqnSys.push_back(*fEcons);
-
-  EqnSys.push_back(*fAngleTheta);
-  EqnSys.push_back(*fAnglePhi);
-  EqnSys.push_back(*fW);
-
-  EqnSys.push_back(*fT);
-
-  ROOT::Math::WrappedMultiTF1 wPconsX(*fPconsX, 6);
-  ROOT::Math::WrappedMultiTF1 wPconsY(*fPconsY, 6);
-  ROOT::Math::WrappedMultiTF1 wPconsZ(*fPconsZ, 6);
-
-  ROOT::Math::WrappedMultiTF1 wEcons(*fEcons, 6);
-
-  ROOT::Math::WrappedMultiTF1 wAngleTheta(*fAngleTheta, 6);
-  ROOT::Math::WrappedMultiTF1 wAnglePhi(*fAnglePhi, 6);
-
-  ROOT::Math::WrappedMultiTF1 wW(*fW, 6);
-
-  ROOT::Math::WrappedMultiTF1 wT(*fT, 6);
-
-  //WrappedEqns.push_back(wPconsX);
-  //WrappedEqns.push_back(wPconsY);
-  WrappedEqns.push_back(wPconsZ);
-
-  WrappedEqns.push_back(wEcons);
-
-  WrappedEqns.push_back(wAngleTheta);
-  WrappedEqns.push_back(wAnglePhi);
-
-  WrappedEqns.push_back(wW);
-
-  WrappedEqns.push_back(wT);
-
-  Finder = new ROOT::Math::MultiRootFinder();
-
-  for (int i = 0 ; i<nEqns; i++)
-    Finder->AddFunction(WrappedEqns[i]);
 
   char AngleGenName[100] = "AngleGen";
   double dummy[2] = {0,1};
@@ -157,92 +28,192 @@ ProductGen::ProductGen()
   double PhiRange[2] = {0, 360*TMath::DegToRad()};
   AngleGen = new CustomRand(AngleGenName, dummy,
                             ThetaRange, PhiRange);
+  CoinToss = new TRandom3();
 
+  W_in_val = W_in();
+
+  Proton = new Particle();
+  Pion = new Particle();
+  Final = new Particle();
+
+  Initial = new Particle();
+  *Initial = *Interaction+*Target;
+
+  UnitVect = new TVector3(0,0,1);
+  F = new TF1("F",
+              "[6]-sqrt([7]**2+x**2)-sqrt([8]**2+([3]-[0]*x)**2+([4]-[1]*x)**2+([5]-[2]*x)**2)",
+              0, 11000);
 
 }
 
-
-void ProductGen::SetIncident(Particle * inIncident)
+void ProductGen::SetInteraction(Particle * inInteraction)
 {
-  Incident = inIncident;
+  Interaction = inInteraction;
+  W_in_val = W_in();
 }
 
 void ProductGen::SetTarget(Particle * inTarget)
 {
   Target = inTarget;
+  W_in_val = W_in();
+}
+
+double ProductGen::W_in()
+{
+  return (*Interaction+*Target).Mag2();
+}
+
+double ProductGen::W_out()
+{
+  return (*Proton+*Pion).Mag2();
+}
+
+double ProductGen::Qsq_in()
+{
+  return - Interaction->Mag2();
 }
 
 
-
-void ProductGen::SetPars()
+int ProductGen::Solve()
 {
-  pars[0] = Incident->Px();
-  pars[1] = Scattered->Px();
-  pars[2] = Target->Px();
-  pars[3] = Incident->Py();
-  pars[4] = Scattered->Py();
-  pars[5] = Target->Py();
-  pars[6] = Incident->Pz();
-  pars[7] = Scattered->Pz();
-  pars[8] = Target->Pz();
+  *Initial = *Interaction+*Target;
 
-  pars[9] = 0.511;
-  pars[10]= 140;
-  pars[11]= 938;
-  pars[12]= 940;
+  W_in_val = W_in();
 
-  pars[13]= AngleGen->Theta();
-  pars[14]= AngleGen->Phi();
-
-}
-
-void ProductGen::Solve(Particle * inScattered)
-{
-  Scattered = inScattered;
-
-  SetPars();
-
-  //cout << "Done" << endl;
-
-  for(int i = 0; i<nEqns; i++){
-    WrappedEqns[i].SetParameters(pars);
-    EqnSys[i].SetParameters(pars);
-    //cout <<EqnSys[i].GetParameter(6) << endl;
+  if (W_in_val<0){
+    //cout << "W < 0 " << endl;
+    return 1;
   }
 
+  //cout << proton_mass_mev << endl;
 
-  Finder->SetPrintLevel(1);
+  UnitVect->SetTheta(AngleGen->Theta());
+  UnitVect->SetPhi(AngleGen->Phi());
+  UnitVect->SetMag(1);
 
-  //ostream bitBucket(0);
 
-  //Finder->PrintState(bitBucket);
+  double pars[9];
+  pars[0] = UnitVect->X();
+  pars[1] = UnitVect->Y();
+  pars[2] = UnitVect->Z();
+  pars[3] = Initial->Px();
+  pars[4] = Initial->Py();
+  pars[5] = Initial->Pz();
+  pars[6] = Initial->E();
+  pars[7] = pi_mass_mev;
+  pars[8] = proton_mass_mev;
 
-  double x0[6] = {10,10,10,100,1000};
 
-  //cout<< Econs(x0, pars) << endl;
+  F->SetParameters(pars);
 
-  Finder->Solve(x0, 1000, 10);
+  double P = F->GetX(0, 0, pars[6], 0.0001, 10000);
 
-  //cout << Finder->Status()<<endl;
+  //std::cout << "Zero: " << F->Eval(P) << std::endl;
 
+  Particle * Pion1 = new Particle(pi_mass_mev,
+                                  P*pars[0],
+                                  P*pars[1],
+                                  P*pars[2]);
+  *Pion = *Pion1;
+
+  //std::cout << Pion->E() << std::endl;
+
+  Particle * Proton1 = new Particle();
+  *Proton1 = *Initial-*Pion;
+  *Proton = *Proton1;
+
+  if (TMath::Abs(F->Eval(P)) > 1){
+    return 1;
+  }
+
+  if (!SolnCheck())
+    return 1;
+
+  //Check for Second solution:
+  double P2 = F->GetX(0, P+100, pars[6], 0.0001, 10000);
+
+  if (TMath::Abs(F->Eval(P2))> 1){
+    //No second soln
+    return 0;
+  }
+
+  //Try second solution
+  Particle * Pion2 = new Particle(pi_mass_mev,
+                                  P*pars[0],
+                                  P*pars[1],
+                                  P*pars[2]);
+  *Pion = *Pion2;
+
+  Particle * Proton2 = new Particle();
+  *Proton2 = *Initial - * Pion;
+  *Proton = *Proton2;
+
+  if (SolnCheck()){
+    //Toss a coin
+    if (CoinToss->Uniform(0,1)>0.5){
+      return 0; // Keep second solution
+    }
+  }
+
+  //Either SolnCheck or coint toss failed
+  //Revert to original solution
+
+  *Proton = *Proton1;
+  *Pion = *Pion1;
+
+  delete Pion1;
+  delete Pion2;
+  delete Proton1;
+  delete Proton2;
+
+  return 0;
+}
+
+bool ProductGen::SolnCheck()
+{
+  // Double Checking for solution viability
+  if (TMath::Abs(proton_mass_mev-Proton->M())>1){
+    //cerr << "Mass Missmatch" << endl;
+    //cerr << TMath::Abs(proton_mass_mev-Proton->M()) << endl;
+    return false;
+  }
+  if (TMath::Abs(W_in()-W_out())>1){
+    //cerr << "W Missmatch" << endl;
+    //cerr << TMath::Abs(W_in()-W_out()) << endl;
+    return false;
+  }
+  *Final = *Proton + *Pion;
+
+  if (TMath::Abs(Initial->Px()-Final->Px())>1){
+    //cerr << "Px Missmatch" << endl;
+    //cerr << TMath::Abs(Initial->Px()-Final->Px()) << endl;
+    return false;
+  }
+
+  if (TMath::Abs(Initial->Py()-Final->Py())>1){
+    //cerr << "Py Missmatch" << endl;
+    //cerr << TMath::Abs(Initial->Py()-Final->Py()) << endl;
+    return false;
+  }
+
+  if (TMath::Abs(Initial->Pz()-Final->Pz())>1){
+    //cerr << "Pz Missmatch" << endl;
+    //cerr << TMath::Abs(Initial->Pz()-Final->Pz()) << endl;
+    return false;
+  }
+
+  if (TMath::Abs(Initial->E()-Final->E())>1){
+    return false;
+  }
+  return true;
 }
 
 Particle * ProductGen::ProdPion()
 {
-  const double * result = Finder->X();
-  return new Particle(140, result[0], result[1], result[2]);
+  return Pion;
 }
 
 Particle * ProductGen::ProdProton()
 {
-  const double * result = Finder->X();
-  return new Particle(938, result[3], result[4], result[5]);
-}
-
-void ProductGen::PrintPars()
-{
-  for (int i = 0; i<15; i++){
-    cout << WrappedEqns[1].Parameters()[i] << endl;
-  }
-  cout << endl;
+  return Proton;
 }

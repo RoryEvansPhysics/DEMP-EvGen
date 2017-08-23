@@ -14,6 +14,7 @@ ScatteredParticleGen::ScatteredParticleGen(double mass_in,
   mass = mass_in;
   char fname[100] = "ScatteredParticle";
   Rand = new CustomRand(fname, ERange, ThetaRange, PhiRange);
+  ScatteredParticle = new Particle();
 }
 
 Particle * ScatteredParticleGen::GetParticle()
@@ -32,5 +33,6 @@ Particle * ScatteredParticleGen::GetParticle()
   py = p*Sin(theta)*Sin(phi);
   pz = p*Cos(theta);
 
-  return new Particle(mass, px, py, pz);
+  ScatteredParticle->SetPxPyPzE(px,py,pz,E);
+  return ScatteredParticle;
 }

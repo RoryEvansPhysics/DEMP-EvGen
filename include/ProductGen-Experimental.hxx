@@ -1,3 +1,5 @@
+#ifdef ProductGen_Experimental
+
 #ifndef ProductGen_H
 #define ProductGen_H
 
@@ -7,6 +9,7 @@
 #include "TF1.h"
 
 #include <vector>
+
 
 #include "RConfigure.h"
 #ifndef R__HAS_MATHMORE
@@ -63,4 +66,5 @@ public:
   void PrintPars();
 };
 
+#endif
 #endif

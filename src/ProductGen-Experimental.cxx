@@ -4,11 +4,13 @@
   and a negative pion.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
+#ifdef ProductGen_Experimental
+
 #include <vector>
 #include <stdio.h>
 #include <iostream>
 
-#include "ProductGen.hxx"
+#include "ProductGen-Experimental.hxx"
 #include "CustomRand.hxx"
 
 #include "TMath.h"
@@ -246,3 +248,179 @@ void ProductGen::PrintPars()
   }
   cout << endl;
 }
+
+
+int ProductGen::SolveAnalytic()
+{
+  double theta_pi = AngleGen->Theta();
+  double phi_pi = AngleGen->Phi();
+
+  TVector3 * UnitVect = new TVector3(0,0,1);
+  UnitVect->SetTheta(theta_pi);
+  UnitVect->SetPhi(phi_pi);
+  UnitVect->SetMag(1);
+
+  const double pi_mass_mev = 139.57;
+  const double proton_mass_mev = 939.565;
+
+  TVector3 * q = new TVector3();
+  * q = Interaction->Vect();
+
+  double a = - (*q) * (*UnitVect);
+
+  double Q_sq = Qsq_in();
+  double q_sq = q->Mag2();
+  double b = q_sq;
+  double c = Interaction->E() + Target->M();
+  double t = c*c-b+pi_mass_mev*pi_mass_mev-proton_mass_mev*proton_mass_mev;
+
+  double QA = 4*(a*a - c*c);
+  double QB = 4*c*t;
+  double QC = -4*a*a*pi_mass_mev*pi_mass_mev-t*t;
+
+  double radical = QB*QB-4*QA*QC;
+
+  // cout << "QA: " << QA << endl;
+  // cout << "QB: " << QB << endl;
+  // cout << "QC: " << QC << endl;
+
+  cout <<"Radical: " <<  radical << endl;
+
+  double Epi = (-QB - TMath::Sqrt(radical))/(2*QA);
+
+
+  Particle * Pion = new Particle();
+
+  Pion->SetVectM((*UnitVect)*TMath::Sqrt(Epi*Epi-pi_mass_mev*pi_mass_mev),
+                 pi_mass_mev);
+
+  Particle * Proton1 = new Particle();
+  *Proton1 = (*Interaction+*Target)-*Pion;
+  Proton = Proton1;
+
+  cout << "Analytic E_pi: " << Pion->E() << endl;
+
+  cout << "Analytic E before: "
+       << Interaction->E() + Target->E() << endl;
+  cout << "Analytic E After: "
+       << Pion->E() + Proton->E() << endl;
+  cout << "Analytic M_P: " << Proton->M() << endl;
+
+  cout << "Analytic W before: " << W_in() << endl;
+  cout << "Analytic W after: " << W_out() << endl;
+
+
+  cout << "Analytic Px diff: "
+       << Interaction->Px()+Target->Px()-Pion->Px()-Proton->Px()
+       << endl;
+  cout << "Analytic Py diff: "
+       << Interaction->Py()+Target->Py()-Pion->Py()-Proton->Py()
+       << endl;
+  cout << "Analytic Pz diff: "
+       << Interaction->Pz()+Target->Pz()-Pion->Pz()-Proton->Pz()
+       << endl;
+  return 0;
+}
+
+int ProductGen::Solve()
+{
+  W_in_val = W_in();
+
+  const double pi_mass_mev = 139.57;
+  const double proton_mass_mev = 939.565;
+
+  Particle * Proton1 = new Particle();
+  Particle * Pion1 = new Particle();
+  TVector3 * PionVect = new TVector3(0,0,1);
+  double P_start = Start*((*Interaction+*Target).Pmag());
+  PionVect->SetTheta(AngleGen->Theta());
+  PionVect->SetPhi(AngleGen->Phi());
+  double P_end = End*((*Interaction+*Target).Pmag());
+  double P_step_size = StepSize*((*Interaction+*Target).Pmag());
+
+  //cout << "Target Mass: " << Target->M() << endl;
+
+  double P_step = P_start;
+
+
+  int sol1 = 0;
+  int sol2 = 0;
+
+  while (P_step < P_end){
+    PionVect->SetMag(P_step);
+    Pion1->SetVectM(*PionVect, pi_mass_mev);
+
+    *Proton1 = *Interaction+*Target-*Pion1;
+
+    if (TMath::Abs(Proton1->M()-proton_mass_mev)< (MTol*proton_mass_mev)){
+      sol1 = 1;
+      break;
+    }
+
+    P_step += P_step_size;
+
+
+  }
+
+
+  Particle * Proton2 = new Particle();
+  Particle * Pion2 = new Particle();
+
+  while (P_step > P_start){
+    PionVect->SetMag(P_step);
+    Pion2->SetVectM(*PionVect, pi_mass_mev);
+
+    *Proton2 = *Interaction+*Target-*Pion2;
+
+    if (TMath::Abs(Proton2->M()-proton_mass_mev)< (MTol*proton_mass_mev)){
+      sol2 = 2;
+      break;
+    }
+
+    P_step -= P_step_size;
+  }
+
+  switch(sol1+sol2){
+  case 0 :
+    cout << "No Solution. " << endl;
+    return 1;
+    break;
+  case 1 :
+    cout << "Solved one way." << endl;
+    Proton = Proton1;
+    Pion = Pion1;
+    return 0;
+    break;
+  case 2 :
+    cout << "Solved other way." << endl;
+    Proton = Proton2;
+    Pion = Pion1;
+    return 0;
+    break;
+  case 3 :
+    cout << "Solved both ways." << endl;
+    if (TMath::Abs(Pion1->E()-Pion2->E())<P_step_size){
+      cout << "Solutions are the same." << endl;
+      Proton = Proton1;
+      Pion = Pion1;
+      std::cout << Interaction->X()+Target->X() << "\t"
+                << Interaction->E()+Target->E()<<std::endl;
+      std::cout << Proton->X()+Pion->X()<< "\t"
+                << Proton->E()+Pion->E() <<std::endl;
+      return 0;
+      break;
+    }
+    else{
+      cout << "Solutions are different! Panic!" << endl;
+      return 1;
+      break;
+    }
+
+  }
+
+
+
+}
+
+
+#endif
