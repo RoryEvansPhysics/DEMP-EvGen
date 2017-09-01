@@ -19,6 +19,7 @@
 #include "ProductGen.hxx"
 #include "TreeBuilder.hxx"
 #include "Constants.hxx"
+#include "SigmaL.hxx"
 
 using namespace std;
 using namespace constants;
@@ -89,6 +90,18 @@ int main(){
   Output -> AddParticle(VertScatElec);
   Output -> AddParticle(VertTargNeut);
 
+  double qsq_MeV, qsq_GeV;
+  double t_MeV, t_GeV;
+  double w_MeV, w_GeV;
+  double s_MeV, s_GeV;
+
+  double sigma_l;
+
+  Output -> AddDouble(&qsq_GeV,"qsq_GeV");
+  Output -> AddDouble(&w_GeV,"w_GeV");
+  Output -> AddDouble(&t_GeV,"t_GeV");
+  Output -> AddDouble(&sigma_l,"sigma_l");
+
   cout << "Starting Main Loop." << endl;
 
   for (int i=0; i<nEvents; i++){
@@ -104,6 +117,20 @@ int main(){
     *VertProdPion = *ProtonPionGen->ProdPion();
     *VertProdProt = *ProtonPionGen->ProdProton();
     //    cout<<VertProdPion->GetPid() << endl;
+
+    qsq_MeV = -(Photon->Mag2());
+    qsq_GeV = qsq_MeV/1000000;
+
+    w_MeV = (*Photon+*VertTargNeut).Mag();
+    w_GeV = w_MeV/1000;
+
+    t_MeV = (*Photon-*VertProdPion).Mag2();
+    t_GeV = t_MeV/1000000;
+
+    sigma_l = MySigmaL(qsq_GeV,-t_GeV,w_GeV);
+
+    //cout << sigma_l << endl;
+
     Output->Fill();
   }
 

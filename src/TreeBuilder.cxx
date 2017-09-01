@@ -102,3 +102,16 @@ void TreeBuilder::Save()
   Tree_Out->AutoSave();
   //File_Out->Write();
 }
+
+void TreeBuilder::AddDouble(double* x, char* name)
+{
+  char b_name[100];
+  char l_list[100];
+
+  strcpy(b_name, name);
+  strcpy(l_list, name);
+  strcat(l_list,"/D");
+
+  Tree_Out->Branch(b_name, x, l_list);
+
+}

@@ -31,6 +31,7 @@ public:
   TreeBuilder(char * name);
 
   void AddParticle(Particle * p);
+  void AddDouble(double * x, char* name);
 
   void Fill();
   void Save();
