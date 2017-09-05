@@ -19,6 +19,8 @@ class TreeBuilder
   std::vector<Particle*> ParticleList;
   std::vector< std::vector< double* >* > PropList;
 
+  int nVars;
+
   char* tree_name;
   char* file_name;
 

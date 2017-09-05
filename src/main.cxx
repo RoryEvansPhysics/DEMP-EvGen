@@ -20,6 +20,7 @@
 #include "TreeBuilder.hxx"
 #include "Constants.hxx"
 #include "SigmaL.hxx"
+#include "SigmaT.hxx"
 
 using namespace std;
 using namespace constants;
@@ -96,11 +97,13 @@ int main(){
   double s_MeV, s_GeV;
 
   double sigma_l;
+  double sigma_t;
 
   Output -> AddDouble(&qsq_GeV,"qsq_GeV");
   Output -> AddDouble(&w_GeV,"w_GeV");
   Output -> AddDouble(&t_GeV,"t_GeV");
   Output -> AddDouble(&sigma_l,"sigma_l");
+  Output -> AddDouble(&sigma_t,"sigma_t");
 
   cout << "Starting Main Loop." << endl;
 
@@ -128,6 +131,7 @@ int main(){
     t_GeV = t_MeV/1000000;
 
     sigma_l = MySigmaL(qsq_GeV,-t_GeV,w_GeV);
+    sigma_t = MySigmaT(qsq_GeV,-t_GeV,w_GeV);
 
     //cout << sigma_l << endl;
 

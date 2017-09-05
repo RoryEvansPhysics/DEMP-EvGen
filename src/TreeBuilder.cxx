@@ -1,5 +1,6 @@
 #include "TreeBuilder.hxx"
 #include "Particle.hxx"
+#include "Constants.hxx"
 
 #include <iostream>
 #include <vector>
@@ -20,15 +21,17 @@ TreeBuilder::TreeBuilder(char * name)
   Tree_Out->SetAutoSave();
 
   nParticles = 0;
+
+  nVars = 8;
 }
 
 void TreeBuilder::AddParticle(Particle * p)
 {
   ParticleList.push_back(p);
-  vector< double* >* TempVec = new vector<double*>(5);
+  vector< double* >* TempVec = new vector<double*>(nVars);
   // Vector elements must be initialized to non-null
   // pointers
-  for (int i = 0; i<5; i++)
+  for (int i = 0; i<nVars; i++)
     TempVec->at(i) = new double();
 
   PropList.push_back(TempVec);
@@ -68,6 +71,24 @@ void TreeBuilder::AddParticle(Particle * p)
   strcat(l_list, "/D");
   Tree_Out->Branch(b_name,TempVec->at(4),l_list);
 
+  strcpy(b_name, p_name);
+  strcat(b_name, "_theta");
+  strcpy(l_list, b_name);
+  strcat(l_list, "/D");
+  Tree_Out->Branch(b_name,TempVec->at(5),l_list);
+
+  strcpy(b_name, p_name);
+  strcat(b_name, "_phi");
+  strcpy(l_list, b_name);
+  strcat(l_list, "/D");
+  Tree_Out->Branch(b_name,TempVec->at(6),l_list);
+
+  strcpy(b_name, p_name);
+  strcat(b_name, "_P");
+  strcpy(l_list, b_name);
+  strcat(l_list, "/D");
+  Tree_Out->Branch(b_name,TempVec->at(7),l_list);
+
   nParticles++;
 
   //cout << ParticleList[0] << endl;
@@ -93,6 +114,9 @@ void TreeBuilder::Retrieve()
     *PropList.at(i)->at(2) = ParticleList.at(i)->Py();
     *PropList.at(i)->at(3) = ParticleList.at(i)->Pz();
     *PropList.at(i)->at(4) = ParticleList.at(i)->E();
+    *PropList.at(i)->at(5) = ParticleList.at(i)->Theta()*constants::DEG;
+    *PropList.at(i)->at(6) = ParticleList.at(i)->Phi()*constants::DEG;
+    *PropList.at(i)->at(7) = ParticleList.at(i)->P();
     //cout <<  &PropList.at(i)->at(1) << endl;
   }
 }
