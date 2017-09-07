@@ -21,6 +21,8 @@
 #include "Constants.hxx"
 #include "SigmaL.hxx"
 #include "SigmaT.hxx"
+#include "SigmaTT.hxx"
+#include "SigmaLT.hxx"
 
 using namespace std;
 using namespace constants;
@@ -98,12 +100,16 @@ int main(){
 
   double sigma_l;
   double sigma_t;
+  double sigma_tt;
+  double sigma_lt;
 
   Output -> AddDouble(&qsq_GeV,"qsq_GeV");
   Output -> AddDouble(&w_GeV,"w_GeV");
   Output -> AddDouble(&t_GeV,"t_GeV");
   Output -> AddDouble(&sigma_l,"sigma_l");
   Output -> AddDouble(&sigma_t,"sigma_t");
+  Output -> AddDouble(&sigma_tt,"sigma_tt");
+  Output -> AddDouble(&sigma_lt,"sigma_lt");
 
   cout << "Starting Main Loop." << endl;
 
@@ -132,6 +138,8 @@ int main(){
 
     sigma_l = MySigmaL(qsq_GeV,-t_GeV,w_GeV);
     sigma_t = MySigmaT(qsq_GeV,-t_GeV,w_GeV);
+    sigma_lt = MySigmaLT(qsq_GeV,-t_GeV,w_GeV);
+    sigma_tt = MySigmaTT(qsq_GeV,-t_GeV,w_GeV);
 
     //cout << sigma_l << endl;
 

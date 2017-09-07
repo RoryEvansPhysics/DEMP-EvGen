@@ -1,6 +1,6 @@
 # Emacs Stuff #
 *~
-*\#
+*\#*
 GPATH
 GRTAGS
 GTAGS
@@ -44,4 +44,5 @@ GPATH
 
 # misc
 build/
+debug/
 .dir-locals.el
