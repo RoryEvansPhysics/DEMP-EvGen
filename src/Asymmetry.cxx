@@ -38,7 +38,7 @@ int Asymmetry::Parameterize(vector<double> in_Qsq)
   //Go to default work file if not extern not available
   if (WorkFile->IsZombie()){
     WorkFile = new TFile("../output/test.root");
-    cout << "File Opened" << endl;
+    // cout << "File Opened" << endl;
   }
 
   GK_Raw = (TTree*)WorkFile->Get("GK_Raw");
@@ -62,6 +62,10 @@ int Asymmetry::Parameterize(vector<double> in_Qsq)
   char tempname3[100];
   TGraph *gtemp;
 
+  int n;
+
+  double param2;
+
   for (i = 0; i < nQsq; i++){
 
     sprintf(tempname1, tfnamestr, AsyNameStr, i);
@@ -69,7 +73,10 @@ int Asymmetry::Parameterize(vector<double> in_Qsq)
     sprintf(tempname2, plotstr, AsyNameStr);
     sprintf(tempname3, cutstr, Qsq_Vec[i]);
 
-    int n = GK_Raw->Draw(tempname2, tempname3, "goff");
+    n = GK_Raw->Draw(tempname2, tempname3, "goff");
+
+    param2 = GK_Raw->GetV2()[n-1];
+    AsyFunction.at(i)->FixParameter(2,param2);
 
     gtemp = new TGraph(n, GK_Raw->GetV1(), GK_Raw->GetV2());
     gtemp -> Fit(tempname1, "q");
@@ -91,7 +98,7 @@ int Asymmetry::Parameterize()
   Qsq_Vec.resize(distance(Qsq_Vec.begin(), it));
   nQsq = Qsq_Vec.size();
   Parameterize(Qsq_Vec);
-  cout << nQsq << endl;
+  // cout << nQsq << endl;
   return 0;
 }
 
@@ -160,6 +167,8 @@ double Asymmetry::GetAsyAmp(double Qsq, double tp)
   x2 = Qsq_Vec[n_high];
   y1 = AsyFunction[n_low]->Eval(tp);
   y2 = AsyFunction[n_high]->Eval(tp);
+
+  //cout<<x1<<"\t"<<x2<<"\t"<<y1<<"\t"<<y2<<endl;
 
   y0 = Extrap(x0, x1, x2, y1, y2);
   return y0;

@@ -91,7 +91,6 @@ int ProductGen::Solve()
   UnitVect->SetPhi(AngleGen->Phi());
   UnitVect->SetMag(1);
 
-
   double pars[9];
   pars[0] = UnitVect->X();
   pars[1] = UnitVect->Y();

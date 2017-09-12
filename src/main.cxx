@@ -10,6 +10,7 @@
 #include "TCanvas.h"
 #include "TApplication.h"
 #include "TMath.h"
+#include "TVector3.h"
 
 //Project includes
 #include "Particle.hxx"
@@ -19,10 +20,8 @@
 #include "ProductGen.hxx"
 #include "TreeBuilder.hxx"
 #include "Constants.hxx"
-#include "SigmaL.hxx"
-#include "SigmaT.hxx"
-#include "SigmaTT.hxx"
-#include "SigmaLT.hxx"
+#include "DEMPEvent.hxx"
+#include "SigmaCalc.hxx"
 
 using namespace std;
 using namespace constants;
@@ -38,32 +37,39 @@ int main(){
 
   double beamE_MeV = 11000;
 
+  DEMPEvent* VertEvent = new DEMPEvent();
+  SigmaCalc* Sig = new SigmaCalc(VertEvent);
+
   // Declare vertex particles
   Particle * VertBeamElec = new Particle(elec_mass_mev,
                                          0, 0, beamE_MeV);
   VertBeamElec->SetPid(pid_elec);
   VertBeamElec->SetName("VertBeamElec");
+  VertEvent->BeamElec = VertBeamElec;
 
   Particle * VertTargNeut = new Particle(neutron_mass_mev,
                                          0, 0, 0);
   VertTargNeut->SetPid(pid_neut);
   VertTargNeut->SetName("VertTargNeut");
+  VertEvent->TargNeut = VertTargNeut;
 
   Particle * VertScatElec = new Particle();
   VertScatElec->SetMass(elec_mass_mev);
   VertScatElec->SetPid(pid_elec);
   VertScatElec->SetName("VertScatElec");
+  VertEvent->ScatElec = VertScatElec;
 
   Particle * VertProdPion = new Particle();
   VertProdPion->SetMass(pi_mass_mev);
   VertProdPion->SetPid(pid_pion);
   VertProdPion->SetName("VertProdPion");
+  VertEvent->ProdPion = VertProdPion;
 
   Particle * VertProdProt = new Particle();
   VertProdProt->SetMass(proton_mass_mev);
   VertProdProt->SetPid(pid_prot);
   VertProdProt->SetName("VertProdProt");
-
+  VertEvent->ProdProt = VertProdProt;
 
   double elecERange[2] = {0.1*beamE_MeV,0.9*beamE_MeV};
   double elecThetaRange[2] = {5/DEG, 25/DEG};
@@ -76,6 +82,7 @@ int main(){
                              elecPhiRange);
 
   Particle * Photon = new Particle();
+  VertEvent->VirtPhot = Photon;
 
   ProductGen * ProtonPionGen = new ProductGen(Photon,
                                               VertTargNeut);
@@ -98,10 +105,25 @@ int main(){
   double w_MeV, w_GeV;
   double s_MeV, s_GeV;
 
+  double t_min_MeV, t_min_GeV;
+  double t_prime_GeV;
+
   double sigma_l;
   double sigma_t;
   double sigma_tt;
   double sigma_lt;
+
+  double sigma_uu;
+  double sigma_ut;
+
+  double sigma_k0;
+  double sigma_k1;
+  double sigma_k2;
+  double sigma_k3;
+  double sigma_k4;
+
+  double sigma_k5 = 0;
+
 
   Output -> AddDouble(&qsq_GeV,"qsq_GeV");
   Output -> AddDouble(&w_GeV,"w_GeV");
@@ -110,6 +132,15 @@ int main(){
   Output -> AddDouble(&sigma_t,"sigma_t");
   Output -> AddDouble(&sigma_tt,"sigma_tt");
   Output -> AddDouble(&sigma_lt,"sigma_lt");
+  Output -> AddDouble(&sigma_uu,"sigma_uu");
+  Output -> AddDouble(&sigma_ut,"sigma_ut");
+
+  Output -> AddDouble(&sigma_k0,"sigma_k0");
+  Output -> AddDouble(&sigma_k1,"sigma_k1");
+  Output -> AddDouble(&sigma_k2,"sigma_k2");
+  Output -> AddDouble(&sigma_k3,"sigma_k3");
+  Output -> AddDouble(&sigma_k4,"sigma_k4");
+  Output -> AddDouble(&sigma_k5,"sigma_k5");
 
   cout << "Starting Main Loop." << endl;
 
@@ -127,24 +158,27 @@ int main(){
     *VertProdProt = *ProtonPionGen->ProdProton();
     //    cout<<VertProdPion->GetPid() << endl;
 
-    qsq_MeV = -(Photon->Mag2());
-    qsq_GeV = qsq_MeV/1000000;
+    qsq_GeV = VertEvent->qsq_GeV();
+    w_GeV = VertEvent->w_GeV();
+    t_GeV = VertEvent->t_GeV();
 
-    w_MeV = (*Photon+*VertTargNeut).Mag();
-    w_GeV = w_MeV/1000;
+    sigma_l = Sig->sigma_l();
+    sigma_t = Sig->sigma_t();
+    sigma_lt = Sig->sigma_lt();
+    sigma_tt = Sig->sigma_tt();
+    sigma_uu = Sig->sigma_uu();
+    sigma_ut = Sig->sigma_ut();
 
-    t_MeV = (*Photon-*VertProdPion).Mag2();
-    t_GeV = t_MeV/1000000;
-
-    sigma_l = MySigmaL(qsq_GeV,-t_GeV,w_GeV);
-    sigma_t = MySigmaT(qsq_GeV,-t_GeV,w_GeV);
-    sigma_lt = MySigmaLT(qsq_GeV,-t_GeV,w_GeV);
-    sigma_tt = MySigmaTT(qsq_GeV,-t_GeV,w_GeV);
-
-    //cout << sigma_l << endl;
+    sigma_k0 = Sig->Sigma_k(0);
+    sigma_k1 = Sig->Sigma_k(1);
+    sigma_k2 = Sig->Sigma_k(2);
+    sigma_k3 = Sig->Sigma_k(3);
+    sigma_k4 = Sig->Sigma_k(4);
+    sigma_k5 = Sig->Sigma_k(5);
 
     Output->Fill();
   }
+
 
   Output->Save();
 
