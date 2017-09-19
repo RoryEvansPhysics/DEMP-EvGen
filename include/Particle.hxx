@@ -59,5 +59,7 @@ public:
   char * GetName();
   void SetName(char * name);
 
+  void SetThetaPhiE(double theta, double phi, double E);
+
 };
 #endif

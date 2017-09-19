@@ -50,6 +50,7 @@ public:
   void SetTarget(Particle * inTarget);
 
   int Solve();
+  int Solve(double theta, double phi);
 
   int TestSolve();
 

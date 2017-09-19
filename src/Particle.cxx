@@ -4,10 +4,13 @@
 
 #include "Particle.hxx"
 #include "TVector3.h"
+#include "TMath.h"
 
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
+
+using namespace TMath;
 
 int Particle::GetPid()
 {
@@ -128,4 +131,15 @@ char * Particle::GetName()
 void Particle::SetName(char * name)
 {
   identifier = name;
+}
+
+void Particle::SetThetaPhiE(double theta, double phi, double E)
+{
+  TVector3* P = new TVector3(0,0,1);
+  P->SetTheta(theta);
+  P->SetPhi(phi);
+  double Pmag = Sqrt(E*E - proper_mass*proper_mass);
+  P->SetMag(Pmag);
+
+  this->SetVectM(*P,proper_mass);
 }

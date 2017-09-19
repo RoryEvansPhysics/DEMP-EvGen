@@ -9,6 +9,7 @@
 #include <vector>
 #include <array>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "TF1.h"
 #include "TFile.h"
@@ -30,7 +31,7 @@ Asymmetry::Asymmetry(char * in_AsyName, char * in_Func,
   AsyNameStr = in_AsyName;
   FuncForm = in_Func;
   if (refit) Parameterize(in_Qsq);
-  else SetPars();
+  else SetPars(in_Qsq);
 }
 
 int Asymmetry::Parameterize(vector<double> in_Qsq)
@@ -52,11 +53,13 @@ int Asymmetry::Parameterize(vector<double> in_Qsq)
     Qsq_Vec = in_Qsq;
   }
 
-  char tfnamestr[100] = "%s%i";
+  char tfnamestr[100] = "%s_%d";
   char plotstr[100] = "tp:%s";
   char cutstr[100] = "q2==%g";
 
   int i = 0;
+  int j = 0;
+  char intstr[2];
   char tempname1[100];
   char tempname2[100];
   char tempname3[100];
@@ -65,6 +68,7 @@ int Asymmetry::Parameterize(vector<double> in_Qsq)
   int n;
 
   double param2;
+
 
   for (i = 0; i < nQsq; i++){
 
@@ -75,11 +79,24 @@ int Asymmetry::Parameterize(vector<double> in_Qsq)
 
     n = GK_Raw->Draw(tempname2, tempname3, "goff");
 
+
+    // The previous version of this parameterization used
+    // only one TF1. As a result, the parameters were
+    // initialized by the previous fit.
+    // The following code attempts to replicate that.
+    if (i>0){
+      nPars = AsyFunction.at(i)->GetNpar();
+      for (j=0; j<nPars; j++){
+        AsyFunction.at(i)->SetParameter(j, AsyFunction.at(i-1)
+                                        ->GetParameter(j));
+      }
+    }
+
     param2 = GK_Raw->GetV2()[n-1];
     AsyFunction.at(i)->FixParameter(2,param2);
 
     gtemp = new TGraph(n, GK_Raw->GetV1(), GK_Raw->GetV2());
-    gtemp -> Fit(tempname1, "q");
+    gtemp -> Fit(tempname1, "MQ");
   }
 
   return 0;
@@ -166,7 +183,11 @@ double Asymmetry::GetAsyAmp(double Qsq, double tp)
   x1 = Qsq_Vec[n_low];
   x2 = Qsq_Vec[n_high];
   y1 = AsyFunction[n_low]->Eval(tp);
+  cout << "x1:\t" << x1 << endl;
+  cout << "y1:\t" << y1 << endl;
   y2 = AsyFunction[n_high]->Eval(tp);
+  cout << "x2:\t" << x2 << endl;
+  cout << "y2:\t" << y2 << endl;
 
   //cout<<x1<<"\t"<<x2<<"\t"<<y1<<"\t"<<y2<<endl;
 
@@ -175,9 +196,56 @@ double Asymmetry::GetAsyAmp(double Qsq, double tp)
 
 }
 
-int Asymmetry::SetPars()
+int Asymmetry::SetPars(vector<double> in_Qsq)
 {
-  cerr << "Warning: Not Implemented" << endl;
-  cerr << "Use Parameterize" << endl;
-  return 1;
+  //Go to default work file if not extern not available
+  if (WorkFile->IsZombie()){
+    WorkFile = new TFile("../output/test.root");
+    // cout << "File Opened" << endl;
+  }
+
+  nQsq = in_Qsq.size();
+  if (nQsq == 0) {
+    return Parameterize();
+  }
+
+  else{
+    Qsq_Vec = in_Qsq;
+  }
+
+  TTree * Pars = (TTree*)WorkFile->Get(AsyNameStr);
+
+  char tfnamestr[100] = "%s_%d";
+
+  char tempname1[100];
+
+  for (int i = 0; i < nQsq; i++){
+    sprintf(tempname1, tfnamestr, AsyNameStr, i);
+    AsyFunction.push_back(new TF1(tempname1, FuncForm));
+  }
+
+  nPars = AsyFunction.at(0)->GetNpar();
+
+  double pars[nPars];
+
+  Pars->SetBranchAddress("pars",&pars);
+
+  for (int i=0; i<nQsq; i++){
+    Pars->GetEntry(i);
+    AsyFunction.at(i)->SetParameters(&pars[0]);
+  }
+
+}
+
+void Asymmetry::PrintPars()
+{
+  nPars = AsyFunction.at(0)->GetNpar();
+  for (int i = 0; i < nQsq; i++){
+    cout << "Qsq:\t"<< Qsq_Vec.at(i) << endl;
+    for (int j = 0; j < nPars; j++){
+      cout << "Par "<<j<<":\t"
+           <<AsyFunction.at(i)->GetParameter(j)
+           << endl;
+    }
+  }
 }

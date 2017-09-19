@@ -41,7 +41,7 @@ public:
             vector<double> in_Qsq = vector<double>(),
             bool refit = true);
 
-  int SetPars();            // Set Pars from file
+  int SetPars(vector<double> in_Qsq);            // Set Pars from file
 
   int Parameterize();       // Set pars from fitting
 
@@ -54,7 +54,7 @@ public:
   // void SetFunc(const string& fitfunc, int n);
                             // Sets the fitting function from string
 
-
+  void PrintPars();
 
 };
 #endif

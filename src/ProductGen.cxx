@@ -73,8 +73,15 @@ double ProductGen::Qsq_in()
   return - Interaction->Mag2();
 }
 
-
 int ProductGen::Solve()
+{
+  double theta = AngleGen->Theta();
+  double phi = AngleGen->Phi();
+
+  this->Solve(theta, phi);
+}
+
+int ProductGen::Solve(double theta, double phi)
 {
   *Initial = *Interaction+*Target;
 
@@ -87,8 +94,8 @@ int ProductGen::Solve()
 
   //cout << proton_mass_mev << endl;
 
-  UnitVect->SetTheta(AngleGen->Theta());
-  UnitVect->SetPhi(AngleGen->Phi());
+  UnitVect->SetTheta(theta);
+  UnitVect->SetPhi(phi);
   UnitVect->SetMag(1);
 
   double pars[9];

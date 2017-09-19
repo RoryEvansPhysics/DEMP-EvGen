@@ -92,7 +92,7 @@ void VR_SigL(string in_filepath, string out_filepath){
   gDirectory->Delete("VR_SigL_Raw;*");
   //This ensures only the most recent tree in in the file
 
-  TTree VR_SigL_Raw("VR_SigL_Raw", "Asymmetry Data");
+  TTree VR_SigL_Raw("VR_SigL_Raw", "VR Model");
 
   //Initialize variables for each data column
   Double_t Q2, W, Negt, sigL;
@@ -110,4 +110,69 @@ void VR_SigL(string in_filepath, string out_filepath){
   }
 
   VR_SigL_Raw.Write();
+}
+
+
+void AsyPars(string in_filepath, string out_filepath,
+             string asyname, int nPars)
+{
+  ifstream in_filestream;
+
+  in_filestream.open(in_filepath.c_str());
+
+  if (! in_filestream){
+    cout << "File not Found" << endl;
+    exit(1);
+  }
+
+
+  //Create a tree
+  TFile out_TFile(out_filepath.c_str(), "UPDATE");
+
+  TTree t1(asyname.c_str(), "Asymmetry");
+
+  double pars[nPars];
+  double Qsq;
+
+  char llist[100] = "pars[%d]/D";
+  char temp[100];
+
+  sprintf(temp, llist, nPars);
+
+  t1.Branch("Qsq",&Qsq,"Qsq/D");
+  t1.Branch("pars",&pars,temp);
+
+  while(!in_filestream.eof()){
+    in_filestream >> Qsq;
+    for (int i=0; i<nPars; i++){
+      in_filestream >> pars[i];
+    }
+    t1.Fill();
+  }
+
+  t1.Write();
+}
+
+void AsyAll()
+{
+  AsyPars("../data/input/asyout.txt",
+          "../data/output/test.root",
+          "asy",
+          4);
+  AsyPars("../data/input/asysfiout.txt",
+          "../data/output/test.root",
+          "asysfi",
+          3);
+  AsyPars("../data/input/asy2fiout.txt",
+          "../data/output/test.root",
+          "asy2fi",
+          3);
+  AsyPars("../data/input/asyfpfsout.txt",
+          "../data/output/test.root",
+          "asyfpfs",
+          3);
+  AsyPars("../data/input/asy3fout.txt",
+          "../data/output/test.root",
+          "asy3f",
+          3);
 }

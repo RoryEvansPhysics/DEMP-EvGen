@@ -128,6 +128,8 @@ int main(){
   Output -> AddDouble(&qsq_GeV,"qsq_GeV");
   Output -> AddDouble(&w_GeV,"w_GeV");
   Output -> AddDouble(&t_GeV,"t_GeV");
+  Output -> AddDouble(&t_prime_GeV, "t_prime_GeV");
+
   Output -> AddDouble(&sigma_l,"sigma_l");
   Output -> AddDouble(&sigma_t,"sigma_t");
   Output -> AddDouble(&sigma_tt,"sigma_tt");
@@ -161,6 +163,7 @@ int main(){
     qsq_GeV = VertEvent->qsq_GeV();
     w_GeV = VertEvent->w_GeV();
     t_GeV = VertEvent->t_GeV();
+    t_prime_GeV = VertEvent->t_prime_GeV();
 
     sigma_l = Sig->sigma_l();
     sigma_t = Sig->sigma_t();
@@ -174,15 +177,85 @@ int main(){
     sigma_k2 = Sig->Sigma_k(2);
     sigma_k3 = Sig->Sigma_k(3);
     sigma_k4 = Sig->Sigma_k(4);
-    sigma_k5 = Sig->Sigma_k(5);
 
     Output->Fill();
   }
 
-
-  Output->Save();
+  if (nSuccess>0)
+    Output->Save();
 
   cout << "Successful Events: \t" << nSuccess << endl;
   cout << "Failed Events: \t\t" << nFail << endl;
+
+
+  // Debug/Checks:
+
+  if(nEvents == -1){
+
+    cout << "Running Debug/Check Values" << endl;
+
+    VertScatElec->SetThetaPhiE(22.2453/DEG, 54.1335/DEG, 3896.41);
+    *Photon = *VertBeamElec - *VertScatElec;
+
+    ProtonPionGen->Solve(13.326/DEG,239.229/DEG);
+
+    *VertProdPion = *ProtonPionGen->ProdPion();
+    *VertProdProt = *ProtonPionGen->ProdProton();
+
+    qsq_GeV = VertEvent->qsq_GeV();
+    w_GeV = VertEvent->w_GeV();
+    t_GeV = VertEvent->t_GeV();
+    t_prime_GeV = VertEvent->t_prime_GeV();
+
+    sigma_l = Sig->sigma_l();
+    sigma_t = Sig->sigma_t();
+    sigma_lt = Sig->sigma_lt();
+    sigma_tt = Sig->sigma_tt();
+    sigma_uu = Sig->sigma_uu();
+    sigma_ut = Sig->sigma_ut();
+
+    sigma_k0 = Sig->Sigma_k(0);
+    sigma_k1 = Sig->Sigma_k(1);
+    sigma_k2 = Sig->Sigma_k(2);
+    sigma_k3 = Sig->Sigma_k(3);
+    sigma_k4 = Sig->Sigma_k(4);
+
+    cout << "ElecE:\t" << VertScatElec->E()/1000 << endl;
+    cout << "ElecTh:\t"<<VertScatElec->Theta()*DEG << endl;
+    cout << "ElecPhi:\t"<<VertScatElec->Phi()*DEG << endl;
+
+    cout << "PionE:\t"<<VertProdPion->E()/1000 << endl;
+    cout << "PionTh:\t"<<VertProdPion->Theta()*DEG << endl;
+    cout << "PionPhi:\t"<<VertProdPion->Phi()*DEG << endl;
+
+    cout << "ProtE:\t"<<VertProdProt->E()/1000 << endl;
+    cout << "ProtTh:\t"<<VertProdProt->Theta()*DEG << endl;
+    cout << "ProtPhi:\t"<<VertProdProt->Phi()*DEG << endl;
+
+    cout << "Qsq:\t" << qsq_GeV << endl;
+    cout << "W:\t" << w_GeV << endl;
+    cout << "t:\t" << t_GeV << endl;
+    cout << "t\':\t"<< t_prime_GeV << endl;
+
+    cout << endl;
+
+    cout <<"sigma_ut:\t"<< sigma_ut << endl;
+    cout <<"sigma_l:\t"<< sigma_l << endl;
+    cout <<"sigma_t:\t"<< sigma_t << endl;
+    cout <<"sigma_lt:\t"<< sigma_lt << endl;
+    cout <<"sigma_tt:\t"<< sigma_tt << endl;
+    cout <<"AsyP-Ps:\t"<< sigma_k0 << endl;
+    cout <<"AsyPs:\t"<< sigma_k1 << endl;
+    cout <<"Asy2P-Ps:\t"<< sigma_k2 << endl;
+    cout <<"AsyP+Ps:\t"<< sigma_k3 << endl;
+    cout <<"Asy3P-Ps:\t"<< sigma_k4 << endl;
+    cout <<"Asy2P_Ps:\t"<< sigma_k5 << endl;
+
+    Sig->Asyms->at(0)->PrintPars();
+
+  }
+
+
+
   return 0;
 }

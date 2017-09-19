@@ -29,7 +29,7 @@ double DEMPEvent::t_para_GeV()
   double E2 = ProdPion->E();
   double P2 = ProdPion->P();
 
-  return ((E1+E2)*(E1+E2))-((P1+P2)*(P1+P2));
+  return (((E1+E2)*(E1+E2))-((P1+P2)*(P1+P2)))/1000000;
 }
 
 double DEMPEvent::t_prime_GeV()
@@ -39,7 +39,7 @@ double DEMPEvent::t_prime_GeV()
 
 double DEMPEvent::Phi_s()
 {
-  return ScatElec->Phi();
+  return ScatElec->Phi() - TMath::Pi();
 }
 
 double DEMPEvent::Phi()

@@ -21,6 +21,7 @@ SigmaCalc::SigmaCalc(DEMPEvent* in_Event):Event(in_Event)
   qsq.push_back(4.335);
   qsq.push_back(4.845);
   qsq.push_back(5.138);
+  qsq.push_back(5.557);
   qsq.push_back(5.948);
   qsq.push_back(6.049);
   qsq.push_back(6.393);
@@ -32,33 +33,29 @@ SigmaCalc::SigmaCalc(DEMPEvent* in_Event):Event(in_Event)
 
   Asyms->at(0) =
     new Asymmetry("asy",
-                  "[0]*exp([1]*x)-([0]+[2])*exp([3]*x)+[2]",
-                  qsq, true);
-  Asyms->at(0)->Parameterize(qsq);
+                  "[0]*exp([1]*x)+(-[2]-[0])*exp([3]*x)+[2]",
+                  qsq, false);
 
   Asyms->at(1) =
     new Asymmetry("asysfi",
                   "[0]*exp([1]*x)+[2]",
-                  qsq, true);
+                  qsq, false);
   Asyms->at(1)->Parameterize(qsq);
 
   Asyms->at(2) =
     new Asymmetry("asy2fi",
                   "[0]*exp([1]*x)+[2]",
-                  qsq, true);
-  Asyms->at(2)->Parameterize(qsq);
+                  qsq, false);
 
   Asyms->at(3) =
     new Asymmetry("asyfpfs",
                   "[0]*exp([1]*x)+[2]",
-                  qsq, true);
-  Asyms->at(3)->Parameterize(qsq);
+                  qsq, false);
 
   Asyms->at(4) =
     new Asymmetry("asy3f",
                   "[0]*exp([1]*x)+[2]",
-                  qsq, true);
-  Asyms->at(4)->Parameterize(qsq);
+                  qsq, false);
 
 }
 
@@ -70,7 +67,7 @@ double SigmaCalc::sigma_l()
 }
 double SigmaCalc::sigma_t()
 {
-  return MySigmaL(Event->qsq_GeV(),
+  return MySigmaT(Event->qsq_GeV(),
                   -Event->t_GeV(),
                   Event->w_GeV());
 }
@@ -111,9 +108,9 @@ double SigmaCalc::sigma_uu()
 
 double SigmaCalc::Sigma_k(int k)
 {
-  double sigk = this -> sigma_uu()
-    * Asyms->at(k)->GetAsyAmp(Event->qsq_GeV(),
-                              Event->t_prime_GeV());
+  double sigk = this -> Asyms->at(k)
+    ->GetAsyAmp(Event->qsq_GeV(),
+                Event->t_prime_GeV());
   // cout << sigk << endl;
   return sigk;
 }
@@ -131,6 +128,7 @@ double SigmaCalc::sigma_ut()
   sigut += Sin(3*phi-phi_s)*this->Sigma_k(4);
 
   sigut *= -pt/(Sqrt(1-Power(Sin(theta)*Sin(phi_s),2)));
+  sigut *= this->sigma_uu();
 
   return sigut;
 }
