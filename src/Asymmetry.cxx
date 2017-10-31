@@ -157,7 +157,7 @@ double Asymmetry::GetAsyAmp(double Qsq, double tp)
   if (nQsq == 1){
     cerr << "Warning: Only only one Qsq value in use." << endl;
     cerr << "No extrapolation between fits." << endl;
-    return AsyFunction[0]->Eval(tp);
+    return AsyFunction[0]->Eval(-tp);
   }
 
   // Find nearest value in Qsq_Vec < Qsq
@@ -182,12 +182,12 @@ double Asymmetry::GetAsyAmp(double Qsq, double tp)
 
   x1 = Qsq_Vec[n_low];
   x2 = Qsq_Vec[n_high];
-  y1 = AsyFunction[n_low]->Eval(tp);
-  cout << "x1:\t" << x1 << endl;
-  cout << "y1:\t" << y1 << endl;
-  y2 = AsyFunction[n_high]->Eval(tp);
-  cout << "x2:\t" << x2 << endl;
-  cout << "y2:\t" << y2 << endl;
+  y1 = AsyFunction[n_low]->Eval(-tp);
+  //cout << "x1:\t" << x1 << endl;
+  //cout << "y1:\t" << y1 << endl;
+  y2 = AsyFunction[n_high]->Eval(-tp);
+  //cout << "x2:\t" << x2 << endl;
+  //cout << "y2:\t" << y2 << endl;
 
   //cout<<x1<<"\t"<<x2<<"\t"<<y1<<"\t"<<y2<<endl;
 

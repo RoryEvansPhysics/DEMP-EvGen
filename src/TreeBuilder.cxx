@@ -1,6 +1,7 @@
 #include "TreeBuilder.hxx"
 #include "Particle.hxx"
 #include "Constants.hxx"
+#include "DEMPEvent.hxx"
 
 #include <iostream>
 #include <vector>
@@ -110,13 +111,13 @@ void TreeBuilder::Retrieve()
   for (int i = 0; i < nParticles; i++){
     //cout << PropList.at(i)->at(1) <<endl;
     *PropList.at(i)->at(0) = (double)ParticleList.at(i)->GetPid();
-    *PropList.at(i)->at(1) = ParticleList.at(i)->Px();
-    *PropList.at(i)->at(2) = ParticleList.at(i)->Py();
-    *PropList.at(i)->at(3) = ParticleList.at(i)->Pz();
-    *PropList.at(i)->at(4) = ParticleList.at(i)->E();
+    *PropList.at(i)->at(1) = ParticleList.at(i)->Px()/1000;
+    *PropList.at(i)->at(2) = ParticleList.at(i)->Py()/1000;
+    *PropList.at(i)->at(3) = ParticleList.at(i)->Pz()/1000;
+    *PropList.at(i)->at(4) = ParticleList.at(i)->E()/1000;
     *PropList.at(i)->at(5) = ParticleList.at(i)->Theta()*constants::DEG;
     *PropList.at(i)->at(6) = ParticleList.at(i)->Phi()*constants::DEG;
-    *PropList.at(i)->at(7) = ParticleList.at(i)->P();
+    *PropList.at(i)->at(7) = ParticleList.at(i)->P()/1000;
     //cout <<  &PropList.at(i)->at(1) << endl;
   }
 }
@@ -138,4 +139,24 @@ void TreeBuilder::AddDouble(double* x, char* name)
 
   Tree_Out->Branch(b_name, x, l_list);
 
+}
+
+void TreeBuilder::AddEvent(DEMPEvent * event)
+{
+  this->AddParticle(event->BeamElec);
+  this->AddParticle(event->ProdPion);
+  this->AddParticle(event->ProdProt);
+  this->AddParticle(event->ScatElec);
+  this->AddParticle(event->TargNeut);
+
+  this->AddDouble(event->qsq_GeV,"qsq_GeV");
+  this->AddDouble(event->w_GeV,"w_GeV");
+  this->AddDouble(event->t_GeV,"t_GeV");
+  this->AddDouble(event->t_prime_GeV, "t_prime_GeV");
+  this->AddDouble(event->x_B, "x_B");
+  this->AddDouble(event->negt, "negt");
+
+  this->AddDouble(event->Vertex_x,"Vertex_x");
+  this->AddDouble(event->Vertex_y,"Vertex_y");
+  this->AddDouble(event->Vertex_z,"Vertex_z");
 }

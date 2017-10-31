@@ -1,0 +1,10 @@
+______Single integral rate (Hz)____________________
+eletron rate_forward: 19912.5
+eletron rate_large: 7.26585e+08
+pimton rate_forward: 4.97152e+08
+pimton rate_large: 0
+______forward and large angle integral rate____________________
+rate_forward: 706.017
+rate_large: 3.2011e+08
+______electron and pion coincidence rate____________________
+rate: 3.2011e+08

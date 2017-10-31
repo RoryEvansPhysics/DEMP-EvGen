@@ -25,7 +25,13 @@ public:
 
   double sigma_ut();
 
+  double fluxfactor();
+
+  double sigma();
+
   double epsilon();
+
+  double weight(int nGen);
 };
 
 

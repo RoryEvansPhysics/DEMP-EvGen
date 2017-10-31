@@ -1,12 +1,13 @@
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   Takes particle and event data, and adds data addresses to to
   a TTree to be saved.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 #ifndef TreeBuilder_H
 #define TreeBuilder_H
 
 #include "Particle.hxx"
+#include "DEMPEvent.hxx"
 
 #include "TTree.h"
 #include "TFile.h"
@@ -34,7 +35,7 @@ public:
 
   void AddParticle(Particle * p);
   void AddDouble(double * x, char* name);
-
+  void AddEvent(DEMPEvent * event);
   void Fill();
   void Save();
 };

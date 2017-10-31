@@ -9,9 +9,14 @@
 #include "SigmaT.hxx"
 #include "SigmaLT.hxx"
 #include "SigmaTT.hxx"
+#include "Constants.hxx"
+
+#include "correction.h"
 
 #include "SigmaCalc.hxx"
 
+using namespace std;
+using namespace constants;
 using namespace TMath;
 
 SigmaCalc::SigmaCalc(DEMPEvent* in_Event):Event(in_Event)
@@ -61,42 +66,52 @@ SigmaCalc::SigmaCalc(DEMPEvent* in_Event):Event(in_Event)
 
 double SigmaCalc::sigma_l()
 {
-  return MySigmaL(Event->qsq_GeV(),
-                  -Event->t_GeV(),
-                  Event->w_GeV());
+  return MySigmaL(*Event->qsq_GeV,
+                  -*Event->t_GeV,
+                  *Event->w_GeV);
 }
 double SigmaCalc::sigma_t()
 {
-  return MySigmaT(Event->qsq_GeV(),
-                  -Event->t_GeV(),
-                  Event->w_GeV());
+  return MySigmaT(*Event->qsq_GeV,
+                  -*Event->t_GeV,
+                  *Event->w_GeV);
 }
 double SigmaCalc::sigma_tt()
 {
-  return MySigmaTT(Event->qsq_GeV(),
-                   -Event->t_GeV(),
-                   Event->w_GeV());
+  double sig_tt = MySigmaTT(*Event->qsq_GeV,
+                            -*Event->t_GeV,
+                            *Event->w_GeV);
+  if ((sig_tt<0) && (Abs(sig_tt)>abs(this->sigma_t())))
+    sig_tt = correctionToSigTT(sig_tt,
+                               this->sigma_t(),
+                               *Event->qsq_GeV);
+  return sig_tt;
 }
 double SigmaCalc::sigma_lt()
 {
-  return MySigmaLT(Event->qsq_GeV(),
-                   -Event->t_GeV(),
-                   Event->w_GeV());
+  double sig_lt = MySigmaLT(*Event->qsq_GeV,
+                            -*Event->t_GeV,
+                            *Event->w_GeV);
+  if ((sig_lt<0) && (Abs(sig_lt)>abs(this->sigma_t())))
+    sig_lt = correctionToSigLT(sig_lt,
+                               this->sigma_t(),
+                               *Event->qsq_GeV);
+  return sig_lt;
 }
 
 double SigmaCalc::epsilon()
 {
-  double q = Event->VirtPhot->P();
-  double theta = Event->Theta();
+  double q = Event->VirtPhot->P()/1000;
+  double theta = *Event->Theta;
 
-  return 1/(1 + 2*(q*q)/(Event->qsq_GeV())*
+  return 1.0/(1.0 + 2.0*(q*q)/(*Event->qsq_GeV)*
             Power(Tan(theta/2),2));
 
 }
 
 double SigmaCalc::sigma_uu()
 {
-  double phi = Event->Phi();
+  double phi = *Event->Phi;
   double eps = this->epsilon();
   double siguu = this->sigma_t();
   siguu += eps*this->sigma_l();
@@ -109,19 +124,20 @@ double SigmaCalc::sigma_uu()
 double SigmaCalc::Sigma_k(int k)
 {
   double sigk = this -> Asyms->at(k)
-    ->GetAsyAmp(Event->qsq_GeV(),
-                Event->t_prime_GeV());
+    ->GetAsyAmp(*Event->qsq_GeV,
+                *Event->t_prime_GeV);
   // cout << sigk << endl;
   return sigk;
 }
 
 double SigmaCalc::sigma_ut()
 {
-  double phi = Event->Phi();
-  double phi_s = Event->Phi_s();
-  double theta = Event->Theta();
-  double pt = Event->P_T;
+  double phi = *Event->Phi;
+  double phi_s = *Event->Phi_s;
+  double theta = *Event->Theta;
+  double pt = *Event->P_T;
   double sigut = Sin(phi - phi_s)*this->Sigma_k(0);
+  //cout << sigut << endl;
   sigut += Sin(phi_s)*this->Sigma_k(1);
   sigut += Sin(2*phi-phi_s)*this->Sigma_k(2);
   sigut += Sin(phi+phi_s)*this->Sigma_k(3);
@@ -131,4 +147,25 @@ double SigmaCalc::sigma_ut()
   sigut *= this->sigma_uu();
 
   return sigut;
+}
+
+double SigmaCalc::sigma()
+{
+  return (this->sigma_uu()+sigma_ut())*this->fluxfactor();
+}
+
+double SigmaCalc::weight(int nGen)
+{
+  return (this->sigma())*PSF*nBcm2*Lumi/nGen;
+}
+
+double SigmaCalc::fluxfactor()
+{
+  double ff = alpha/(2*Power(Pi(),2));
+  ff *= (Event->ScatElec->E())/(EBeam);
+  ff /= *(Event->qsq_GeV);
+  ff /= 1-this->epsilon();
+  ff *= (Power((*Event->w_GeV)*1000,2))-Power(neutron_mass_mev,2);
+  ff /= Power(neutron_mass_mev,2);
+  return ff;
 }

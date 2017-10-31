@@ -260,7 +260,7 @@ int ProductGen::SolveAnalytic()
   UnitVect->SetPhi(phi_pi);
   UnitVect->SetMag(1);
 
-  const double pi_mass_mev = 139.57;
+  const double pion_mass_mev = 139.57;
   const double proton_mass_mev = 939.565;
 
   TVector3 * q = new TVector3();
@@ -272,11 +272,11 @@ int ProductGen::SolveAnalytic()
   double q_sq = q->Mag2();
   double b = q_sq;
   double c = Interaction->E() + Target->M();
-  double t = c*c-b+pi_mass_mev*pi_mass_mev-proton_mass_mev*proton_mass_mev;
+  double t = c*c-b+pion_mass_mev*pion_mass_mev-proton_mass_mev*proton_mass_mev;
 
   double QA = 4*(a*a - c*c);
   double QB = 4*c*t;
-  double QC = -4*a*a*pi_mass_mev*pi_mass_mev-t*t;
+  double QC = -4*a*a*pion_mass_mev*pion_mass_mev-t*t;
 
   double radical = QB*QB-4*QA*QC;
 
@@ -291,8 +291,8 @@ int ProductGen::SolveAnalytic()
 
   Particle * Pion = new Particle();
 
-  Pion->SetVectM((*UnitVect)*TMath::Sqrt(Epi*Epi-pi_mass_mev*pi_mass_mev),
-                 pi_mass_mev);
+  Pion->SetVectM((*UnitVect)*TMath::Sqrt(Epi*Epi-pion_mass_mev*pion_mass_mev),
+                 pion_mass_mev);
 
   Particle * Proton1 = new Particle();
   *Proton1 = (*Interaction+*Target)-*Pion;
@@ -326,7 +326,7 @@ int ProductGen::Solve()
 {
   W_in_val = W_in();
 
-  const double pi_mass_mev = 139.57;
+  const double pion_mass_mev = 139.57;
   const double proton_mass_mev = 939.565;
 
   Particle * Proton1 = new Particle();
@@ -348,7 +348,7 @@ int ProductGen::Solve()
 
   while (P_step < P_end){
     PionVect->SetMag(P_step);
-    Pion1->SetVectM(*PionVect, pi_mass_mev);
+    Pion1->SetVectM(*PionVect, pion_mass_mev);
 
     *Proton1 = *Interaction+*Target-*Pion1;
 
@@ -368,7 +368,7 @@ int ProductGen::Solve()
 
   while (P_step > P_start){
     PionVect->SetMag(P_step);
-    Pion2->SetVectM(*PionVect, pi_mass_mev);
+    Pion2->SetVectM(*PionVect, pion_mass_mev);
 
     *Proton2 = *Interaction+*Target-*Pion2;
 

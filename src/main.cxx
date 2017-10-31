@@ -41,7 +41,7 @@ int main(){
   SigmaCalc* Sig = new SigmaCalc(VertEvent);
 
   // Declare vertex particles
-  Particle * VertBeamElec = new Particle(elec_mass_mev,
+  Particle * VertBeamElec = new Particle(electron_mass_mev,
                                          0, 0, beamE_MeV);
   VertBeamElec->SetPid(pid_elec);
   VertBeamElec->SetName("VertBeamElec");
@@ -54,13 +54,13 @@ int main(){
   VertEvent->TargNeut = VertTargNeut;
 
   Particle * VertScatElec = new Particle();
-  VertScatElec->SetMass(elec_mass_mev);
+  VertScatElec->SetMass(electron_mass_mev);
   VertScatElec->SetPid(pid_elec);
   VertScatElec->SetName("VertScatElec");
   VertEvent->ScatElec = VertScatElec;
 
   Particle * VertProdPion = new Particle();
-  VertProdPion->SetMass(pi_mass_mev);
+  VertProdPion->SetMass(pion_mass_mev);
   VertProdPion->SetPid(pid_pion);
   VertProdPion->SetName("VertProdPion");
   VertEvent->ProdPion = VertProdPion;
@@ -72,11 +72,11 @@ int main(){
   VertEvent->ProdProt = VertProdProt;
 
   double elecERange[2] = {0.1*beamE_MeV,0.9*beamE_MeV};
-  double elecThetaRange[2] = {5/DEG, 25/DEG};
+  double elecThetaRange[2] = {6/DEG, 26/DEG};
   double elecPhiRange[2] = {0, 360/DEG};
 
   ScatteredParticleGen * ElecGen =
-    new ScatteredParticleGen(elec_mass_mev,
+    new ScatteredParticleGen(electron_mass_mev,
                              elecERange,
                              elecThetaRange,
                              elecPhiRange);
@@ -94,19 +94,7 @@ int main(){
 
   TreeBuilder * Output = new TreeBuilder("Output");
 
-  Output -> AddParticle(VertBeamElec);
-  Output -> AddParticle(VertProdPion);
-  Output -> AddParticle(VertProdProt);
-  Output -> AddParticle(VertScatElec);
-  Output -> AddParticle(VertTargNeut);
-
-  double qsq_MeV, qsq_GeV;
-  double t_MeV, t_GeV;
-  double w_MeV, w_GeV;
-  double s_MeV, s_GeV;
-
-  double t_min_MeV, t_min_GeV;
-  double t_prime_GeV;
+  Output->AddEvent(VertEvent);
 
   double sigma_l;
   double sigma_t;
@@ -124,11 +112,10 @@ int main(){
 
   double sigma_k5 = 0;
 
+  double sigma;
 
-  Output -> AddDouble(&qsq_GeV,"qsq_GeV");
-  Output -> AddDouble(&w_GeV,"w_GeV");
-  Output -> AddDouble(&t_GeV,"t_GeV");
-  Output -> AddDouble(&t_prime_GeV, "t_prime_GeV");
+  double weight;
+  double epsilon;
 
   Output -> AddDouble(&sigma_l,"sigma_l");
   Output -> AddDouble(&sigma_t,"sigma_t");
@@ -144,6 +131,10 @@ int main(){
   Output -> AddDouble(&sigma_k4,"sigma_k4");
   Output -> AddDouble(&sigma_k5,"sigma_k5");
 
+  Output -> AddDouble(&sigma, "sigma");
+
+  Output -> AddDouble(&weight,"weight");
+  Output -> AddDouble(&epsilon, "epsilon");
   cout << "Starting Main Loop." << endl;
 
   for (int i=0; i<nEvents; i++){
@@ -160,10 +151,8 @@ int main(){
     *VertProdProt = *ProtonPionGen->ProdProton();
     //    cout<<VertProdPion->GetPid() << endl;
 
-    qsq_GeV = VertEvent->qsq_GeV();
-    w_GeV = VertEvent->w_GeV();
-    t_GeV = VertEvent->t_GeV();
-    t_prime_GeV = VertEvent->t_prime_GeV();
+
+    VertEvent->Update();
 
     sigma_l = Sig->sigma_l();
     sigma_t = Sig->sigma_t();
@@ -177,6 +166,12 @@ int main(){
     sigma_k2 = Sig->Sigma_k(2);
     sigma_k3 = Sig->Sigma_k(3);
     sigma_k4 = Sig->Sigma_k(4);
+
+    sigma = Sig->sigma();
+
+    //if (sigma<0) continue;
+
+    weight = Sig->weight(nEvents);
 
     Output->Fill();
   }
@@ -194,7 +189,7 @@ int main(){
 
     cout << "Running Debug/Check Values" << endl;
 
-    VertScatElec->SetThetaPhiE(22.2453/DEG, 54.1335/DEG, 3896.41);
+    VertScatElec->SetThetaPhiE(8.25269/DEG, 76.8565/DEG, 5786.06);
     *Photon = *VertBeamElec - *VertScatElec;
 
     ProtonPionGen->Solve(13.326/DEG,239.229/DEG);
@@ -202,10 +197,15 @@ int main(){
     *VertProdPion = *ProtonPionGen->ProdPion();
     *VertProdProt = *ProtonPionGen->ProdProton();
 
-    qsq_GeV = VertEvent->qsq_GeV();
-    w_GeV = VertEvent->w_GeV();
-    t_GeV = VertEvent->t_GeV();
-    t_prime_GeV = VertEvent->t_prime_GeV();
+    VertEvent->Update();
+
+    double qsq_GeV = *VertEvent->qsq_GeV;
+    double w_GeV = *VertEvent->w_GeV;
+    double t_GeV = *VertEvent->t_GeV;
+    double t_prime_GeV = *VertEvent->t_prime_GeV;
+    double phi = *VertEvent->Phi;
+    double phi_s = *VertEvent->Phi_s;
+    double theta = *VertEvent->Theta;
 
     sigma_l = Sig->sigma_l();
     sigma_t = Sig->sigma_t();
@@ -219,6 +219,8 @@ int main(){
     sigma_k2 = Sig->Sigma_k(2);
     sigma_k3 = Sig->Sigma_k(3);
     sigma_k4 = Sig->Sigma_k(4);
+
+    sigma = Sig->sigma();
 
     cout << "ElecE:\t" << VertScatElec->E()/1000 << endl;
     cout << "ElecTh:\t"<<VertScatElec->Theta()*DEG << endl;
@@ -236,22 +238,27 @@ int main(){
     cout << "W:\t" << w_GeV << endl;
     cout << "t:\t" << t_GeV << endl;
     cout << "t\':\t"<< t_prime_GeV << endl;
-
+    cout << "Phi:\t"<< phi << endl;
+    cout << "Phi_s:\t"<< phi_s << endl;
+    cout << "Theta: \t" << theta << endl;
     cout << endl;
 
-    cout <<"sigma_ut:\t"<< sigma_ut << endl;
+    cout <<"sigma:\t"<< sigma << endl;
     cout <<"sigma_l:\t"<< sigma_l << endl;
     cout <<"sigma_t:\t"<< sigma_t << endl;
     cout <<"sigma_lt:\t"<< sigma_lt << endl;
     cout <<"sigma_tt:\t"<< sigma_tt << endl;
+    cout <<"sigma_uu:\t"<< sigma_uu << endl;
+    cout <<"sigma_ut:\t"<< sigma_ut << endl;
     cout <<"AsyP-Ps:\t"<< sigma_k0 << endl;
     cout <<"AsyPs:\t"<< sigma_k1 << endl;
     cout <<"Asy2P-Ps:\t"<< sigma_k2 << endl;
     cout <<"AsyP+Ps:\t"<< sigma_k3 << endl;
     cout <<"Asy3P-Ps:\t"<< sigma_k4 << endl;
     cout <<"Asy2P_Ps:\t"<< sigma_k5 << endl;
+    cout <<"Epsilon: \t"<< Sig->epsilon() << endl;
 
-    Sig->Asyms->at(0)->PrintPars();
+    // Sig->Asyms->at(0)->PrintPars();
 
   }
 

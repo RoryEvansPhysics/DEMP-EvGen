@@ -24,7 +24,7 @@ ProductGen::ProductGen(Particle* inInteraction, Particle* inTarget):
 
   char AngleGenName[100] = "AngleGen";
   double dummy[2] = {0,1};
-  double ThetaRange[2] = {4*TMath::DegToRad(), 25*TMath::DegToRad()};
+  double ThetaRange[2] = {6*TMath::DegToRad(), 18*TMath::DegToRad()};
   double PhiRange[2] = {0, 360*TMath::DegToRad()};
   AngleGen = new CustomRand(AngleGenName, dummy,
                             ThetaRange, PhiRange);
@@ -106,7 +106,7 @@ int ProductGen::Solve(double theta, double phi)
   pars[4] = Initial->Py();
   pars[5] = Initial->Pz();
   pars[6] = Initial->E();
-  pars[7] = pi_mass_mev;
+  pars[7] = pion_mass_mev;
   pars[8] = proton_mass_mev;
 
 
@@ -116,7 +116,7 @@ int ProductGen::Solve(double theta, double phi)
 
   //std::cout << "Zero: " << F->Eval(P) << std::endl;
 
-  Particle * Pion1 = new Particle(pi_mass_mev,
+  Particle * Pion1 = new Particle(pion_mass_mev,
                                   P*pars[0],
                                   P*pars[1],
                                   P*pars[2]);
@@ -144,7 +144,7 @@ int ProductGen::Solve(double theta, double phi)
   }
 
   //Try second solution
-  Particle * Pion2 = new Particle(pi_mass_mev,
+  Particle * Pion2 = new Particle(pion_mass_mev,
                                   P*pars[0],
                                   P*pars[1],
                                   P*pars[2]);
