@@ -190,7 +190,7 @@ int main(){
 
     cout << "Running Debug/Check Values" << endl;
 
-    VertScatElec->SetThetaPhiE(8.25269/DEG, 76.8565/DEG, 5786.06);
+    VertScatElec->SetThetaPhiE(22.1792/DEG, 58.8528/DEG, 4130.68);
     *Photon = *VertBeamElec - *VertScatElec;
 
     ProtonPionGen->Solve(13.326/DEG,239.229/DEG);
