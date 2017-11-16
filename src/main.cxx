@@ -89,6 +89,7 @@ int main(){
 
   int nSuccess = 0;
   int nFail = 0;
+  int nNeg = 0;
 
   int event_status = 0;
 
@@ -169,7 +170,7 @@ int main(){
 
     sigma = Sig->sigma();
 
-    //if (sigma<0) continue;
+    if (sigma<0) nNeg ++;
 
     weight = Sig->weight(nEvents);
 
@@ -181,7 +182,7 @@ int main(){
 
   cout << "Successful Events: \t" << nSuccess << endl;
   cout << "Failed Events: \t\t" << nFail << endl;
-
+  cout << "Negative Events: \t\t" << nNeg << endl;
 
   // Debug/Checks:
 

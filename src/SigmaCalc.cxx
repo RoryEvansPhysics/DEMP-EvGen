@@ -66,37 +66,56 @@ SigmaCalc::SigmaCalc(DEMPEvent* in_Event):Event(in_Event)
 
 double SigmaCalc::sigma_l()
 {
-  return MySigmaL(*Event->qsq_GeV,
-                  -*Event->t_GeV,
-                  *Event->w_GeV);
+  if(*Event->t_GeV < -1.5)
+    return 1e-6;
+  else{
+    return MySigmaL(*Event->qsq_GeV,
+                    -*Event->t_GeV,
+                    *Event->w_GeV);
+  }
 }
+
 double SigmaCalc::sigma_t()
 {
-  return MySigmaT(*Event->qsq_GeV,
-                  -*Event->t_GeV,
-                  *Event->w_GeV);
+  if (*Event->t_GeV < -1.5)
+    return 1e-6;
+  else{
+    return MySigmaT(*Event->qsq_GeV,
+                    -*Event->t_GeV,
+                    *Event->w_GeV);
+  }
 }
+
 double SigmaCalc::sigma_tt()
 {
-  double sig_tt = MySigmaTT(*Event->qsq_GeV,
-                            -*Event->t_GeV,
-                            *Event->w_GeV);
-  if ((sig_tt<0) && (Abs(sig_tt)>abs(this->sigma_t())))
-    sig_tt = correctionToSigTT(sig_tt,
-                               this->sigma_t(),
-                               *Event->qsq_GeV);
-  return sig_tt;
+  if (*Event->t_GeV < -1.5)
+    return 1e-7;
+  else{
+    double sig_tt = MySigmaTT(*Event->qsq_GeV,
+                              -*Event->t_GeV,
+                              *Event->w_GeV);
+    if ((sig_tt<0) && (Abs(sig_tt)>abs(this->sigma_t())))
+      sig_tt = correctionToSigTT(sig_tt,
+                                 this->sigma_t(),
+                                 *Event->qsq_GeV);
+    return sig_tt;
+  }
 }
+
 double SigmaCalc::sigma_lt()
 {
-  double sig_lt = MySigmaLT(*Event->qsq_GeV,
-                            -*Event->t_GeV,
-                            *Event->w_GeV);
-  if ((sig_lt<0) && (Abs(sig_lt)>abs(this->sigma_t())))
-    sig_lt = correctionToSigLT(sig_lt,
-                               this->sigma_t(),
-                               *Event->qsq_GeV);
-  return sig_lt;
+  if (*Event->t_GeV < -1.5)
+    return 1e-7;
+  else{
+    double sig_lt = MySigmaLT(*Event->qsq_GeV,
+                              -*Event->t_GeV,
+                              *Event->w_GeV);
+    if ((sig_lt<0) && (Abs(sig_lt)>abs(this->sigma_t())))
+      sig_lt = correctionToSigLT(sig_lt,
+                                 this->sigma_t(),
+                                 *Event->qsq_GeV);
+    return sig_lt;
+  }
 }
 
 double SigmaCalc::epsilon()
@@ -105,7 +124,7 @@ double SigmaCalc::epsilon()
   double theta = *Event->Theta;
 
   return 1.0/(1.0 + 2.0*(q*q)/(*Event->qsq_GeV)*
-            Power(Tan(theta/2),2));
+              Power(Tan(theta/2),2));
 
 }
 
