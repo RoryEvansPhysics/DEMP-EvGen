@@ -29,6 +29,10 @@ using namespace constants;
 TFile * WorkFile;
 
 int main(){
+
+  bool fermi = true;
+
+
   int nEvents;
   cout << "Enter the number of events: " << endl;
   cin >> nEvents;
@@ -170,7 +174,11 @@ int main(){
 
     sigma = Sig->sigma();
 
+<<<<<<< HEAD
     if (sigma<0) nNeg ++;
+=======
+    //if (sigma<0) continue;
+>>>>>>> 5c3c38b... Added some old analysis macros under /Macros
 
     weight = Sig->weight(nEvents);
 
@@ -190,7 +198,11 @@ int main(){
 
     cout << "Running Debug/Check Values" << endl;
 
+<<<<<<< HEAD
     VertScatElec->SetThetaPhiE(22.1792/DEG, 58.8528/DEG, 4130.68);
+=======
+    VertScatElec->SetThetaPhiE(8.25269/DEG, 76.8565/DEG, 5786.06);
+>>>>>>> 5c3c38b... Added some old analysis macros under /Macros
     *Photon = *VertBeamElec - *VertScatElec;
 
     ProtonPionGen->Solve(13.326/DEG,239.229/DEG);

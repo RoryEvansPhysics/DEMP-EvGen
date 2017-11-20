@@ -143,3 +143,14 @@ void Particle::SetThetaPhiE(double theta, double phi, double E)
 
   this->SetVectM(*P,proper_mass);
 }
+
+void Particle::SetThetaPhiP(double theta, double phi, double P)
+{
+  TVector3* P = new TVector3(0,0,1);
+  P->SetTheta(theta);
+  P->SetPhi(phi);
+  double Pmag = P;
+  P->SetMag(Pmag);
+
+  this->SetVectM(*P,proper_mass);
+}

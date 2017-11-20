@@ -60,6 +60,7 @@ public:
   void SetName(char * name);
 
   void SetThetaPhiE(double theta, double phi, double E);
+  void SetThetaPhiP(double theta, double phi, double P);
 
 };
 #endif
