@@ -22,6 +22,7 @@
 #include "Constants.hxx"
 #include "DEMPEvent.hxx"
 #include "SigmaCalc.hxx"
+#include "TargetGen.hxx"
 
 using namespace std;
 using namespace constants;
@@ -78,6 +79,8 @@ int main(){
   double elecERange[2] = {0.1*beamE_MeV,0.9*beamE_MeV};
   double elecThetaRange[2] = {6/DEG, 26/DEG};
   double elecPhiRange[2] = {0, 360/DEG};
+
+  TargetGen * NeutGen = new TargetGen(neutron_mass_mev, fermi);
 
   ScatteredParticleGen * ElecGen =
     new ScatteredParticleGen(electron_mass_mev,
@@ -143,8 +146,10 @@ int main(){
   cout << "Starting Main Loop." << endl;
 
   for (int i=0; i<nEvents; i++){
+    *VertTargNeut = *NeutGen->GetParticle();
     *VertScatElec = *ElecGen->GetParticle();
     *Photon = *VertBeamElec - *VertScatElec;
+
     event_status = ProtonPionGen->Solve();
     if (event_status == 0)
       nSuccess ++;
@@ -174,11 +179,8 @@ int main(){
 
     sigma = Sig->sigma();
 
-<<<<<<< HEAD
     if (sigma<0) nNeg ++;
-=======
     //if (sigma<0) continue;
->>>>>>> 5c3c38b... Added some old analysis macros under /Macros
 
     weight = Sig->weight(nEvents);
 
@@ -198,11 +200,8 @@ int main(){
 
     cout << "Running Debug/Check Values" << endl;
 
-<<<<<<< HEAD
     VertScatElec->SetThetaPhiE(22.1792/DEG, 58.8528/DEG, 4130.68);
-=======
     VertScatElec->SetThetaPhiE(8.25269/DEG, 76.8565/DEG, 5786.06);
->>>>>>> 5c3c38b... Added some old analysis macros under /Macros
     *Photon = *VertBeamElec - *VertScatElec;
 
     ProtonPionGen->Solve(13.326/DEG,239.229/DEG);

@@ -66,7 +66,6 @@ SigmaCalc::SigmaCalc(DEMPEvent* in_Event):Event(in_Event)
 
 double SigmaCalc::sigma_l()
 {
-<<<<<<< HEAD
   if(*Event->t_GeV < -1.5)
     return 1e-6;
   else{
@@ -74,16 +73,13 @@ double SigmaCalc::sigma_l()
                     -*Event->t_GeV,
                     *Event->w_GeV);
   }
-=======
   return MySigmaL(*Event->qsq_GeV,
                   -*Event->t_GeV,
                   *Event->w_GeV);
->>>>>>> 5c3c38b... Added some old analysis macros under /Macros
 }
 
 double SigmaCalc::sigma_t()
 {
-<<<<<<< HEAD
   if (*Event->t_GeV < -1.5)
     return 1e-6;
   else{
@@ -91,16 +87,13 @@ double SigmaCalc::sigma_t()
                     -*Event->t_GeV,
                     *Event->w_GeV);
   }
-=======
   return MySigmaT(*Event->qsq_GeV,
                   -*Event->t_GeV,
                   *Event->w_GeV);
->>>>>>> 5c3c38b... Added some old analysis macros under /Macros
 }
 
 double SigmaCalc::sigma_tt()
 {
-<<<<<<< HEAD
   if (*Event->t_GeV < -1.5)
     return 1e-7;
   else{
@@ -113,7 +106,6 @@ double SigmaCalc::sigma_tt()
                                  *Event->qsq_GeV);
     return sig_tt;
   }
-=======
   double sig_tt = MySigmaTT(*Event->qsq_GeV,
                             -*Event->t_GeV,
                             *Event->w_GeV);
@@ -122,12 +114,10 @@ double SigmaCalc::sigma_tt()
                                this->sigma_t(),
                                *Event->qsq_GeV);
   return sig_tt;
->>>>>>> 5c3c38b... Added some old analysis macros under /Macros
 }
 
 double SigmaCalc::sigma_lt()
 {
-<<<<<<< HEAD
   if (*Event->t_GeV < -1.5)
     return 1e-7;
   else{
@@ -140,7 +130,6 @@ double SigmaCalc::sigma_lt()
                                  *Event->qsq_GeV);
     return sig_lt;
   }
-=======
   double sig_lt = MySigmaLT(*Event->qsq_GeV,
                             -*Event->t_GeV,
                             *Event->w_GeV);
@@ -149,7 +138,6 @@ double SigmaCalc::sigma_lt()
                                this->sigma_t(),
                                *Event->qsq_GeV);
   return sig_lt;
->>>>>>> 5c3c38b... Added some old analysis macros under /Macros
 }
 
 double SigmaCalc::epsilon()
@@ -158,11 +146,7 @@ double SigmaCalc::epsilon()
   double theta = *Event->Theta;
 
   return 1.0/(1.0 + 2.0*(q*q)/(*Event->qsq_GeV)*
-<<<<<<< HEAD
               Power(Tan(theta/2),2));
-=======
-            Power(Tan(theta/2),2));
->>>>>>> 5c3c38b... Added some old analysis macros under /Macros
 
 }
 
