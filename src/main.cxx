@@ -23,6 +23,7 @@
 #include "DEMPEvent.hxx"
 #include "SigmaCalc.hxx"
 #include "TargetGen.hxx"
+#include "MatterEffects.hxx"
 
 using namespace std;
 using namespace constants;
