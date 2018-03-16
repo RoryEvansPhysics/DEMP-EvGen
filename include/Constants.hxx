@@ -30,6 +30,32 @@ namespace constants{
   const double nBcm2 = 1e-33;
 
   const double alpha = 1.0/137.0;
+
+
+  //Helium
+
+  const double Helium_Z = 2.0;
+  const double Helium_A = 4.002602;
+  const double Helium_Density = 1.345e-3;
+
+  // Taget Window
+
+  const double Window_Density  = 2.76;    // g/cm^3
+  const double Window_Thickness  = 19.4246; // g/cm2 this is equal to my X0
+  const double Window_Thickness_RadLen = 7.038;    // cm
+  const double Window_Z = 17;
+  const double Window_A = 35;
+
+
+  // Air
+  const double Airtotal = (0.000124 + 0.755267
+                           + 0.231781 + 0.012827);  //total mass of component of air
+  const double Air_Z = int( 6 * 0.000124 / Airtotal + 7 * 0.755267
+                            / Airtotal + 8 * 0.231781 / Airtotal + 18* 0.012827 / Airtotal);
+  const double Air_A = Air_Z / 0.499;
+  const double Air_Density = 1.205e-03;
+
+
 }
 
 #endif

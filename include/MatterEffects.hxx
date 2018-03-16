@@ -9,14 +9,14 @@
 
 class MatterEffects{
 private:
-  static double eta(double aZ);
-  static double b(double aZ);
+  double eta(double aZ);
 
 public:
-  static double X0(double aZ, double aA);
-  static Particle* MultiScatter(Particle* P, double radlen);
-  static Particle* IonLoss(Particle* P, double a, double z, double rho, double t);
-  static Particle* BremLoss(Particle* P, double radlen);
+  double b(double aZ);
+  double X0(double aZ, double aA);
+  Particle* MultiScatter(Particle* P, double radlen);
+  Particle* IonLoss(Particle* P, double a, double z, double rho, double t);
+  Particle* BremLoss(Particle* P, double abt);
 };
 
 #endif

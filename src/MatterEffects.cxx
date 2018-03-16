@@ -27,9 +27,9 @@ Particle* MatterEffects::MultiScatter(Particle* P, double radlen)
   char ms_name[100];
 
   strcpy(ms_name, p_name);
-  strcat(ms_name, "MS");
+  strcat(ms_name, "_MS");
 
-  Pms->SetName(ms_name);
+  //Pms->SetName(ms_name);
 
   beta = P->P()/Sqrt(Power(P->M(),2)+Power(P->P(),2));
   mstheta0 = 13.6/(beta*(P->P()))*Abs(P->GetCharge())*Sqrt(radlen)
@@ -54,13 +54,13 @@ Following functions adapted from eloss.h from
 Zafar Ahmed's Generator (in turn adapted from SIMC)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
-double eta(double aZ)
+double MatterEffects::eta(double aZ)
 {
   //Phys.Rev.D 12,1884 A46
   return log( 1440 * pow( aZ , -2. / 3. ) ) / log( 183 * pow( aZ , -1. / 3. ) );
 }
 
-double b(double aZ)
+double MatterEffects::b(double aZ)
 {
   //Phys.Rev.D 12,1884 A45
   if ( aZ!=0 )
@@ -121,6 +121,8 @@ Particle* MatterEffects::BremLoss( Particle* P, Double_t abt)
 
   double aE0 = P->E();
 
+  //std::cout << aE0 << "\t";
+
   double result = 0;
   if ( abt!=0 )
     result = aE0 * pow( gRandom->Rndm() * 0.999 , 1. / abt );
@@ -131,12 +133,22 @@ Particle* MatterEffects::BremLoss( Particle* P, Double_t abt)
   if ( result < 0 )
     result = 0;
 
-  Pbrem->SetThetaPhiE(P->Theta(),P->Phi(),P->E()-result);
+  //std::cout << result << std::endl;
+
+  Pbrem->SetThetaPhiE(P->Theta(),P->Phi(),result);
+
+  char *p_name = P->GetName();
+  char ms_name[100];
+
+  strcpy(ms_name, p_name);
+  strcat(ms_name, "_Brem");
+
+  //Pms->SetName(ms_name);
 
   return Pbrem;
 }
 
-double IonLoss(Particle* P, double a, double z, double rho, double t )
+Particle * MatterEffects::IonLoss(Particle* P, double a, double z, double rho, double t )
 {
 
   Particle* Pil = new Particle();
@@ -146,6 +158,8 @@ double IonLoss(Particle* P, double a, double z, double rho, double t )
 
   double mass = P->GetMass();
   double aE0 = P->E();
+
+  //std::cout << aE0 << "\t";
 
   double lK = 0.307075;  // Page 398. cm^2/g for A=1 g/mol
 
@@ -173,5 +187,17 @@ double IonLoss(Particle* P, double a, double z, double rho, double t )
   if ( result < 0 )
     result = 0;
 
+  //td::cout << result << std::endl;
+
   Pil->SetThetaPhiE(P->Theta(),P->Phi(),P->E()-result);
+
+  char *p_name = P->GetName();
+  char ms_name[100];
+
+  strcpy(ms_name, p_name);
+  strcat(ms_name, "_Ion");
+
+  //Pms->SetName(ms_name);
+
+  return Pil;
 }

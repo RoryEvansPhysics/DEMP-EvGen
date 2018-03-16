@@ -33,6 +33,12 @@ TFile * WorkFile;
 int main(){
 
   bool fermi = true;
+  bool Eloss = true;
+  bool MS = false;
+  //bool debug = true; //Will keep uncorrected particle data
+
+
+  MatterEffects* ME = new MatterEffects();
 
 
   int nEvents;
@@ -44,6 +50,7 @@ int main(){
   double beamE_MeV = 11000;
 
   DEMPEvent* VertEvent = new DEMPEvent();
+  //DEMPEvent* VertEventME = new DEMPEvent();
   SigmaCalc* Sig = new SigmaCalc(VertEvent);
 
   // Declare vertex particles
@@ -126,6 +133,9 @@ int main(){
   double weight;
   double epsilon;
 
+  double vertexX, vertexY, vertexZ;
+  double targetthickness, airthickness;
+
   Output -> AddDouble(&sigma_l,"sigma_l");
   Output -> AddDouble(&sigma_t,"sigma_t");
   Output -> AddDouble(&sigma_tt,"sigma_tt");
@@ -144,6 +154,11 @@ int main(){
 
   Output -> AddDouble(&weight,"weight");
   Output -> AddDouble(&epsilon, "epsilon");
+
+  Output -> AddDouble(&vertexX, "vertexX");
+  Output -> AddDouble(&vertexY, "vertexY");
+  Output -> AddDouble(&vertexZ, "vertexZ");
+
   cout << "Starting Main Loop." << endl;
 
   for (int i=0; i<nEvents; i++){
@@ -185,6 +200,71 @@ int main(){
 
     weight = Sig->weight(nEvents);
 
+    vertexX = gRandom->Uniform(-0.25, 0.25);
+    vertexY = gRandom->Uniform(-0.25,0.25);
+    vertexZ = gRandom->Uniform(-370,-330);
+
+    //Matter Effects~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    if (Eloss){
+
+      targetthickness = (-330.0 - vertexZ * Helium_Density)/(ME->X0(Helium_Z, Helium_A));
+
+      //Scattered Electron - Target
+
+      *VertScatElec = *ME->BremLoss(VertScatElec, targetthickness*ME->b(Helium_Z));
+      *VertScatElec = *ME->IonLoss(VertScatElec, Helium_A, Helium_Z,
+                                   Helium_Density, targetthickness);
+
+      //Scattered Electron - Window
+
+      *VertScatElec = *ME->BremLoss(VertScatElec, Window_Thickness_RadLen*ME->b(Window_Z));
+      *VertScatElec = *ME->IonLoss(VertScatElec, Window_A, Window_Z,
+                                   Window_Density, Window_Thickness_RadLen);
+
+
+      //Scattered Electron - Air
+
+      airthickness = 450 * Air_Density;
+      if (VertScatElec->Theta() < 16) // Large Angle
+        airthickness = 950 * Air_Density;
+
+      *VertScatElec = *ME->BremLoss(VertScatElec, airthickness*ME->b(Air_Z));
+      *VertScatElec = *ME->IonLoss(VertScatElec, Air_A, Air_Z,
+                                   Air_Density, airthickness);
+
+      //Proton
+
+      airthickness = 450 * Air_Density;
+      if (VertProdProt->Theta() < 16) // Large Angle
+        airthickness = 950 * Air_Density;
+
+      *VertProdProt = *ME->IonLoss(VertProdProt, Helium_A, Helium_Z,
+                                   Helium_Density, targetthickness);
+
+      *VertProdProt = *ME->IonLoss(VertProdProt, Window_A, Window_Z,
+                                   Window_Density, Window_Thickness_RadLen);
+
+      *VertProdProt = *ME->IonLoss(VertProdProt, Air_A, Air_Z,
+                                   Air_Density, airthickness);
+
+
+      //Pion
+
+      airthickness = 450 * Air_Density;
+      if (VertProdPion->Theta() < 16) // Large Angle
+        airthickness = 950 * Air_Density;
+
+      *VertProdPion = *ME->IonLoss(VertProdPion, Helium_A, Helium_Z,
+                                   Helium_Density, targetthickness);
+
+      *VertProdPion = *ME->IonLoss(VertProdPion, Window_A, Window_Z,
+                                   Window_Density, Window_Thickness_RadLen);
+
+      *VertProdPion = *ME->IonLoss(VertProdPion, Air_A, Air_Z,
+                                   Air_Density, airthickness);
+        }
+
     Output->Fill();
   }
 
@@ -194,6 +274,33 @@ int main(){
   cout << "Successful Events: \t" << nSuccess << endl;
   cout << "Failed Events: \t\t" << nFail << endl;
   cout << "Negative Events: \t\t" << nNeg << endl;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // Debug/Checks:
 
