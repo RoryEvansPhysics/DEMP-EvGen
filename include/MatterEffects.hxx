@@ -11,6 +11,11 @@ class MatterEffects{
 private:
   double eta(double aZ);
 
+  double Lrad,Lrad_prime,f_Z, a, aE0, mass;
+  double lK, lbetasq, lxi, lhbarwsq, j, Delta_p, lw;
+  double result;
+  Particle * Pout;
+
 public:
   double b(double aZ);
   double X0(double aZ, double aA);

@@ -130,7 +130,7 @@ char * Particle::GetName()
 
 void Particle::SetName(char * name)
 {
-  identifier = name;
+  strcpy(identifier, name);
 }
 
 void Particle::SetThetaPhiE(double theta, double phi, double E)
@@ -153,4 +153,12 @@ void Particle::SetThetaPhiP(double theta, double phi, double P)
   Pvec->SetMag(Pmag);
 
   this->SetVectM(*Pvec,proper_mass);
+}
+
+
+Particle::Particle(double m, char* name, int pid_in)
+{
+  proper_mass = m;
+  pid = pid_in;
+  strcpy(identifier, name);
 }

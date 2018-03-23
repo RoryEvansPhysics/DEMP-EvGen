@@ -14,7 +14,8 @@ class Particle:public TLorentzVector
 {
   double vx, vy, vz;
 
-  char * identifier;
+  char identifier[100];
+
 
 public:
   int pid;
@@ -43,6 +44,9 @@ public:
   // Set particle momentum to sum zero with
   // the supplied particle
   // (i.e. p_this + p_a + P_b = 0
+
+
+  Particle(double m, char* name, int pid_in);
 
   Particle(double m, double px, double py, double pz);
 

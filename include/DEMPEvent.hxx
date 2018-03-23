@@ -2,12 +2,17 @@
 #define DEMPEvent_H
 
 #include "Particle.hxx"
+#include "TVector3.h"
 
 class DEMPEvent
 {
 public:
 
   DEMPEvent();
+  DEMPEvent(char* prefix);
+
+  void Boost(TVector3 boostvect);
+  TVector3 CoM();
 
   Particle * BeamElec;
   Particle * TargNeut;
@@ -37,6 +42,8 @@ public:
   double* Vertex_z;
 
   void Update();
+
+  DEMPEvent operator = (const DEMPEvent& q);
 
 };
 

@@ -16,15 +16,10 @@ void Triple()
   TCut PionMom = "VertProdPion_P>1 && VertProdPion_P<11";
 
   TCut ProtTheta = "VertProdProt_theta>8 && VertProdProt_theta<24";
-<<<<<<< HEAD
   TCut ProtMom = "VertProdProt_P>0.1";
 
   TCut W = "w_GeV>2 & t_GeV>-1.5";
-=======
-  TCut ProtMom = "VertProdProt_P>0.5";
 
-  TCut W = " w_GeV>2";
->>>>>>> 5c3c38b... Added some old analysis macros under /Macros
 
   TCut Coin = ElecTheta
     && ElecMom

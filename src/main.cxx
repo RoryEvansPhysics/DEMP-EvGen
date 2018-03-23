@@ -32,8 +32,8 @@ TFile * WorkFile;
 
 int main(){
 
-  bool fermi = true;
-  bool Eloss = true;
+  bool fermi = false;
+  bool Eloss = false;
   bool MS = false;
   //bool debug = true; //Will keep uncorrected particle data
 
@@ -49,40 +49,20 @@ int main(){
 
   double beamE_MeV = 11000;
 
-  DEMPEvent* VertEvent = new DEMPEvent();
-  //DEMPEvent* VertEventME = new DEMPEvent();
-  SigmaCalc* Sig = new SigmaCalc(VertEvent);
+  DEMPEvent* VertEvent = new DEMPEvent("Vert");
+  DEMPEvent* RestEvent = new DEMPEvent("RF");
+  DEMPEvent* CofMEvent = new DEMPEvent("CofM");
+  SigmaCalc* Sig = new SigmaCalc(VertEvent, CofMEvent, RestEvent);
 
-  // Declare vertex particles
-  Particle * VertBeamElec = new Particle(electron_mass_mev,
-                                         0, 0, beamE_MeV);
-  VertBeamElec->SetPid(pid_elec);
-  VertBeamElec->SetName("VertBeamElec");
-  VertEvent->BeamElec = VertBeamElec;
 
-  Particle * VertTargNeut = new Particle(neutron_mass_mev,
-                                         0, 0, 0);
-  VertTargNeut->SetPid(pid_neut);
-  VertTargNeut->SetName("VertTargNeut");
-  VertEvent->TargNeut = VertTargNeut;
+  Particle* VertBeamElec = VertEvent->BeamElec;
+  Particle* VertTargNeut = VertEvent->TargNeut;
+  Particle* VertScatElec = VertEvent->ScatElec;
+  Particle* VertProdPion = VertEvent->ProdPion;
+  Particle* VertProdProt = VertEvent->ProdProt;
+  Particle* Photon = VertEvent->VirtPhot;
 
-  Particle * VertScatElec = new Particle();
-  VertScatElec->SetMass(electron_mass_mev);
-  VertScatElec->SetPid(pid_elec);
-  VertScatElec->SetName("VertScatElec");
-  VertEvent->ScatElec = VertScatElec;
-
-  Particle * VertProdPion = new Particle();
-  VertProdPion->SetMass(pion_mass_mev);
-  VertProdPion->SetPid(pid_pion);
-  VertProdPion->SetName("VertProdPion");
-  VertEvent->ProdPion = VertProdPion;
-
-  Particle * VertProdProt = new Particle();
-  VertProdProt->SetMass(proton_mass_mev);
-  VertProdProt->SetPid(pid_prot);
-  VertProdProt->SetName("VertProdProt");
-  VertEvent->ProdProt = VertProdProt;
+  VertBeamElec->SetThetaPhiE(0, 0, EBeam);
 
   double elecERange[2] = {0.1*beamE_MeV,0.9*beamE_MeV};
   double elecThetaRange[2] = {6/DEG, 26/DEG};
@@ -96,8 +76,11 @@ int main(){
                              elecThetaRange,
                              elecPhiRange);
 
-  Particle * Photon = new Particle();
-  VertEvent->VirtPhot = Photon;
+  /*
+    Particle * Photon = new Particle();
+    VertEvent->VirtPhot = Photon;
+  */
+
 
   ProductGen * ProtonPionGen = new ProductGen(Photon,
                                               VertTargNeut);
@@ -111,6 +94,8 @@ int main(){
   TreeBuilder * Output = new TreeBuilder("Output");
 
   Output->AddEvent(VertEvent);
+  Output->AddEvent(CofMEvent);
+  Output->AddEvent(RestEvent);
 
   double sigma_l;
   double sigma_t;
@@ -155,13 +140,12 @@ int main(){
   Output -> AddDouble(&weight,"weight");
   Output -> AddDouble(&epsilon, "epsilon");
 
-  Output -> AddDouble(&vertexX, "vertexX");
-  Output -> AddDouble(&vertexY, "vertexY");
-  Output -> AddDouble(&vertexZ, "vertexZ");
-
   cout << "Starting Main Loop." << endl;
 
   for (int i=0; i<nEvents; i++){
+
+    if (i%100 == 0)
+      cout << i << endl;
     *VertTargNeut = *NeutGen->GetParticle();
     *VertScatElec = *ElecGen->GetParticle();
     *Photon = *VertBeamElec - *VertScatElec;
@@ -179,6 +163,14 @@ int main(){
 
 
     VertEvent->Update();
+
+    *CofMEvent = *VertEvent;
+    CofMEvent->Boost(-VertEvent->CoM());
+    CofMEvent->Update();
+
+    *RestEvent = *VertEvent;
+    RestEvent->Boost(-(VertEvent->TargNeut->Vect()*(1/VertEvent->TargNeut->E())));
+    RestEvent->Update();
 
     sigma_l = Sig->sigma_l();
     sigma_t = Sig->sigma_t();
@@ -200,15 +192,16 @@ int main(){
 
     weight = Sig->weight(nEvents);
 
-    vertexX = gRandom->Uniform(-0.25, 0.25);
-    vertexY = gRandom->Uniform(-0.25,0.25);
-    vertexZ = gRandom->Uniform(-370,-330);
+    *VertEvent->Vertex_x = gRandom->Uniform(-0.25, 0.25);
+    *VertEvent->Vertex_y = gRandom->Uniform(-0.25,0.25);
+    *VertEvent->Vertex_z = gRandom->Uniform(-370,-330);
 
     //Matter Effects~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     if (Eloss){
 
-      targetthickness = (-330.0 - vertexZ * Helium_Density)/(ME->X0(Helium_Z, Helium_A));
+      targetthickness = (-330.0 - *VertEvent->Vertex_x * Helium_Density)/
+        (ME->X0(Helium_Z, Helium_A));
 
       //Scattered Electron - Target
 
@@ -263,7 +256,9 @@ int main(){
 
       *VertProdPion = *ME->IonLoss(VertProdPion, Air_A, Air_Z,
                                    Air_Density, airthickness);
-        }
+    }
+
+
 
     Output->Fill();
   }

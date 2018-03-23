@@ -109,7 +109,6 @@ int ProductGen::Solve(double theta, double phi)
   pars[7] = pion_mass_mev;
   pars[8] = proton_mass_mev;
 
-
   F->SetParameters(pars);
 
   double P = F->GetX(0, 0, pars[6], 0.0001, 10000);

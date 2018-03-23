@@ -50,9 +50,9 @@ Particle* MatterEffects::MultiScatter(Particle* P, double radlen)
 }
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Following functions adapted from eloss.h from
-Zafar Ahmed's Generator (in turn adapted from SIMC)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+  Following functions adapted from eloss.h from
+  Zafar Ahmed's Generator (in turn adapted from SIMC)
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 double MatterEffects::eta(double aZ)
 {
@@ -71,7 +71,6 @@ double MatterEffects::b(double aZ)
 
 double MatterEffects::X0(double aZ, double aA)
 {
-  double Lrad,Lrad_prime,f_Z;
   if ( aZ==1 )
     {
       Lrad=5.31;
@@ -98,7 +97,7 @@ double MatterEffects::X0(double aZ, double aA)
       Lrad_prime = log( 1194.  * pow( aZ , -2./3.));
     }
 
-  double a = constants::alpha * aZ;
+  a = constants::alpha * aZ;
 
   a = a * a;
 
@@ -114,16 +113,16 @@ double MatterEffects::X0(double aZ, double aA)
 
 Particle* MatterEffects::BremLoss( Particle* P, Double_t abt)
 {
-  Particle* Pbrem = new Particle();
-  Pbrem->SetCharge(P->GetCharge());
-  Pbrem->SetMass(P->GetMass());
-  Pbrem->SetPid(P->GetPid());
+  Pout = new Particle();
+  Pout->SetCharge(P->GetCharge());
+  Pout->SetMass(P->GetMass());
+  Pout->SetPid(P->GetPid());
 
-  double aE0 = P->E();
+  aE0 = P->E();
 
   //std::cout << aE0 << "\t";
 
-  double result = 0;
+  result = 0;
   if ( abt!=0 )
     result = aE0 * pow( gRandom->Rndm() * 0.999 , 1. / abt );
 
@@ -135,47 +134,49 @@ Particle* MatterEffects::BremLoss( Particle* P, Double_t abt)
 
   //std::cout << result << std::endl;
 
-  Pbrem->SetThetaPhiE(P->Theta(),P->Phi(),result);
+  Pout->SetThetaPhiE(P->Theta(),P->Phi(),result);
 
-  char *p_name = P->GetName();
-  char ms_name[100];
+  /*
+    char *p_name = P->GetName();
+    char ms_name[100];
 
-  strcpy(ms_name, p_name);
-  strcat(ms_name, "_Brem");
+    strcpy(ms_name, p_name);
+    strcat(ms_name, "_Brem");
 
-  //Pms->SetName(ms_name);
+    //Pms->SetName(ms_name);
+    */
 
-  return Pbrem;
+  return Pout;
 }
 
 Particle * MatterEffects::IonLoss(Particle* P, double a, double z, double rho, double t )
 {
 
-  Particle* Pil = new Particle();
-  Pil->SetCharge(P->GetCharge());
-  Pil->SetMass(P->GetMass());
-  Pil->SetPid(P->GetPid());
+  Pout = new Particle();
+  Pout->SetCharge(P->GetCharge());
+  Pout->SetMass(P->GetMass());
+  Pout->SetPid(P->GetPid());
 
-  double mass = P->GetMass();
-  double aE0 = P->E();
+  mass = P->GetMass();
+  aE0 = P->E();
 
   //std::cout << aE0 << "\t";
 
-  double lK = 0.307075;  // Page 398. cm^2/g for A=1 g/mol
+  lK = 0.307075;  // Page 398. cm^2/g for A=1 g/mol
 
-  double lbetasq = 1 - mass * mass / ( aE0 * aE0 );
+  lbetasq = 1 - mass * mass / ( aE0 * aE0 );
 
-  double lxi = lK / 2 * z / a * t / lbetasq;  //aT: g/cm^2
+  lxi = lK / 2 * z / a * t / lbetasq;  //aT: g/cm^2
 
-  double lhbarwsq = 28.816 * 28.816 * rho * z / a * 1e-12;  //Page 398 MeV arho is density of absorber
+  lhbarwsq = 28.816 * 28.816 * rho * z / a * 1e-12;  //Page 398 MeV arho is density of absorber
 
-  double j = 0.200;
+  j = 0.200;
 
-  double Delta_p = lxi * ( log( 2 * mass * lxi / lhbarwsq ) + j ); // Equation 32.12
+  Delta_p = lxi * ( log( 2 * mass * lxi / lhbarwsq ) + j ); // Equation 32.12
 
-  double lw = 4 * lxi;
+  lw = 4 * lxi;
 
-  double result = 0;
+  result = 0;
 
   if ( z != 0 && a != 0 && t != 0 && rho != 0 )
 
@@ -189,15 +190,17 @@ Particle * MatterEffects::IonLoss(Particle* P, double a, double z, double rho, d
 
   //td::cout << result << std::endl;
 
-  Pil->SetThetaPhiE(P->Theta(),P->Phi(),P->E()-result);
+  Pout->SetThetaPhiE(P->Theta(),P->Phi(),P->E()-result);
 
-  char *p_name = P->GetName();
-  char ms_name[100];
+  /*
+    char *p_name = P->GetName();
+    char ms_name[100];
 
-  strcpy(ms_name, p_name);
-  strcat(ms_name, "_Ion");
+    strcpy(ms_name, p_name);
+    strcat(ms_name, "_Ion");
 
-  //Pms->SetName(ms_name);
+    //Pms->SetName(ms_name);
+    */
 
-  return Pil;
+  return Pout;
 }

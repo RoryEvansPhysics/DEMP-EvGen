@@ -14,6 +14,11 @@ namespace constants{
   const double pion_mass_mev = 139.57;
   const double neutron_mass_mev =  939.565;
 
+  const double electron_mass_gev = 0.511/1000;
+  const double proton_mass_gev = 938.272/1000;
+  const double pion_mass_gev = 139.57/1000;
+  const double neutron_mass_gev =  939.565/1000;
+
   const double DEG = 180/TMath::Pi();
 
   const int pid_pion = -211;
