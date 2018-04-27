@@ -13,39 +13,32 @@
 
 using namespace TMath;
 
-Particle* MatterEffects::MultiScatter(Particle* P, double radlen)
+void MatterEffects::MultiScatter(Particle* P, double radlen)
 {
-  double mstheta, msphi, mstheta0;
-  double beta; //Particle veolcity in units of c.
 
   Particle * Pms = new Particle(P->M(), 0, 0, P->P());
-  Pms->SetCharge(P->GetCharge());
-  Pms->SetMass(P->GetMass());
-  Pms->SetPid(P->GetPid());
-
-  char *p_name = P->GetName();
-  char ms_name[100];
-
-  strcpy(ms_name, p_name);
-  strcat(ms_name, "_MS");
-
-  //Pms->SetName(ms_name);
-
+  //std::cout << P->GetPid()<<"\t"<<P->Theta() << std::endl;
   beta = P->P()/Sqrt(Power(P->M(),2)+Power(P->P(),2));
+  //std::cout << beta << std::endl;
   mstheta0 = 13.6/(beta*(P->P()))*Abs(P->GetCharge())*Sqrt(radlen)
-    * (1+0.38*Log(radlen));
+    * (1+0.038*Log(radlen));
 
+  //std::cout << mstheta0 << std::endl;
   mstheta = gRandom->Gaus(0, mstheta0);
+  //std::cout << mstheta << std::endl;
+
 
   msphi = 2*Pi()*gRandom->Rndm() - Pi();
 
-  Pms->RotateX(mstheta);
+  Pms->RotateY(mstheta);
   Pms->RotateZ(msphi);
 
-  Pms->RotateX(P->Theta());
+  Pms->RotateY(P->Theta());
   Pms->RotateZ(P->Phi());
 
-  return Pms;
+  *P = *Pms;
+
+  delete Pms;
 
 }
 
@@ -111,13 +104,8 @@ double MatterEffects::X0(double aZ, double aA)
 
 }
 
-Particle* MatterEffects::BremLoss( Particle* P, Double_t abt)
+void MatterEffects::BremLoss( Particle* P, Double_t abt)
 {
-  Pout = new Particle();
-  Pout->SetCharge(P->GetCharge());
-  Pout->SetMass(P->GetMass());
-  Pout->SetPid(P->GetPid());
-
   aE0 = P->E();
 
   //std::cout << aE0 << "\t";
@@ -134,28 +122,12 @@ Particle* MatterEffects::BremLoss( Particle* P, Double_t abt)
 
   //std::cout << result << std::endl;
 
-  Pout->SetThetaPhiE(P->Theta(),P->Phi(),result);
+  P->SetThetaPhiE(P->Theta(),P->Phi(),P->E()-result);
 
-  /*
-    char *p_name = P->GetName();
-    char ms_name[100];
-
-    strcpy(ms_name, p_name);
-    strcat(ms_name, "_Brem");
-
-    //Pms->SetName(ms_name);
-    */
-
-  return Pout;
 }
 
-Particle * MatterEffects::IonLoss(Particle* P, double a, double z, double rho, double t )
+void MatterEffects::IonLoss(Particle* P, double a, double z, double rho, double t )
 {
-
-  Pout = new Particle();
-  Pout->SetCharge(P->GetCharge());
-  Pout->SetMass(P->GetMass());
-  Pout->SetPid(P->GetPid());
 
   mass = P->GetMass();
   aE0 = P->E();
@@ -190,7 +162,7 @@ Particle * MatterEffects::IonLoss(Particle* P, double a, double z, double rho, d
 
   //td::cout << result << std::endl;
 
-  Pout->SetThetaPhiE(P->Theta(),P->Phi(),P->E()-result);
+  P->SetThetaPhiE(P->Theta(),P->Phi(),P->E()-result);
 
   /*
     char *p_name = P->GetName();
@@ -202,5 +174,4 @@ Particle * MatterEffects::IonLoss(Particle* P, double a, double z, double rho, d
     //Pms->SetName(ms_name);
     */
 
-  return Pout;
 }

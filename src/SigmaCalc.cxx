@@ -1,4 +1,5 @@
 #include <vector>
+#include "json/json.h"
 
 #include "TMath.h"
 
@@ -19,11 +20,20 @@ using namespace std;
 using namespace constants;
 using namespace TMath;
 
+extern Json::Value obj;
+
+
 SigmaCalc::SigmaCalc(DEMPEvent* in_VertEvent,
                      DEMPEvent* in_CofMEvent,
-                     DEMPEvent* in_RestEvent):
-  VertEvent(in_VertEvent), CofMEvent(in_CofMEvent), RestEvent(in_RestEvent)
+                     DEMPEvent* in_RestEvent,
+                     DEMPEvent* in_TConEvent):
+  VertEvent(in_VertEvent),
+  CofMEvent(in_CofMEvent),
+  RestEvent(in_RestEvent),
+  TConEvent(in_TConEvent)
 {
+
+
   vector<double> qsq;
   qsq.push_back(4.107);
   qsq.push_back(4.335);
@@ -48,7 +58,6 @@ SigmaCalc::SigmaCalc(DEMPEvent* in_VertEvent,
     new Asymmetry("asysfi",
                   "[0]*exp([1]*x)+[2]",
                   qsq, false);
-  Asyms->at(1)->Parameterize(qsq);
 
   Asyms->at(2) =
     new Asymmetry("asy2fi",
@@ -145,24 +154,32 @@ double SigmaCalc::sigma_lt()
 
 double SigmaCalc::epsilon()
 {
-  double q = VertEvent->VirtPhot->P()/1000;
-  double theta = *VertEvent->Theta;
+  double q = RestEvent->VirtPhot->P()/1000;
+  double theta = RestEvent->ScatElec->Theta();
 
   return 1.0/(1.0 + 2.0*(q*q)/(*VertEvent->qsq_GeV)*
-              Power(Tan(theta/2),2));
+              Power(Tan(theta/2.0),2));
 
 }
 
 double SigmaCalc::sigma_uu()
 {
-  double phi = *VertEvent->Phi;
+
+  double phi = *TConEvent->Phi;
   double eps = this->epsilon();
+
   double siguu = this->sigma_t();
+  //cout << siguu << endl;
   siguu += eps*this->sigma_l();
   siguu += Sqrt(2*eps*(1+eps))*this->sigma_lt()*Cos(phi);
   siguu += eps*this->sigma_tt()*Cos(2*phi);
-  siguu /= 2*Pi();
+  //siguu /= 2*Pi();
   return siguu;
+
+  //double siguu = ( this->sigma_t() + eps * this->sigma_l() +
+  //               eps * TMath::Cos( 2.0 * phi ) * this->sigma_tt() +
+  //              TMath::Sqrt( 0.5 * eps * ( 1.0 + eps ) ) * 2.0 * TMath::Cos( phi ) * this->sigma_lt() );
+  //return siguu;
 }
 
 double SigmaCalc::Sigma_k(int k)
@@ -176,19 +193,30 @@ double SigmaCalc::Sigma_k(int k)
 
 double SigmaCalc::sigma_ut()
 {
-  double phi = *VertEvent->Phi;
-  double phi_s = *VertEvent->Phi_s;
-  double theta = *VertEvent->Theta;
-  double pt = *VertEvent->P_T;
+  double phi = *TConEvent->Phi;
+  double phi_s = *TConEvent->Phi_s;
+  double theta = *RestEvent->Theta;
+  double pt = *TConEvent->P_T;
+
+  pt = 0.865; // This is an approximations used in Ahmed's code.
+  //It assumes the the q vector is parallel to the lab z axis.
+
   double sigut = Sin(phi - phi_s)*this->Sigma_k(0);
-  //cout << sigut << endl;
+  //cout << "sigma_ut1\t"<<sigut << endl;
   sigut += Sin(phi_s)*this->Sigma_k(1);
   sigut += Sin(2*phi-phi_s)*this->Sigma_k(2);
   sigut += Sin(phi+phi_s)*this->Sigma_k(3);
   sigut += Sin(3*phi-phi_s)*this->Sigma_k(4);
 
+  //cout << "sigma_ut2\t"<< sigut << endl;
+
+
   sigut *= -pt/(Sqrt(1-Power(Sin(theta)*Sin(phi_s),2)));
+  //cout << "sigma_ut3\t"<< sigut << endl;
   sigut *= this->sigma_uu();
+
+  //cout <<  "sigma_u4\t"<<sigut << endl;
+
 
   return sigut;
 }
@@ -197,14 +225,14 @@ double SigmaCalc::sigma()
 {
   double sigma = (this->sigma_uu()+sigma_ut());
   sigma *= this->fluxfactor_col();
-  sigma *= this->jacobian_cm() * CofMEvent->ProdPion->P() / Pi();
+  sigma *= this->jacobian_cm() * CofMEvent->ProdPion->P() / (1000*Pi());
   sigma *= this->jacobian_cm_col();
   return sigma;
 }
 
 double SigmaCalc::weight(int nGen)
 {
-  return (this->sigma())*PSF*nBcm2*Lumi/nGen;
+  return (this->sigma())*PSF()*uBcm2*Lumi/nGen;
 }
 
 double SigmaCalc::fluxfactor_col()
@@ -212,21 +240,12 @@ double SigmaCalc::fluxfactor_col()
   double ff = alpha/(2*Power(Pi(),2));
   ff *= (VertEvent->ScatElec->E())/(VertEvent->BeamElec->E());
   ff *= (Power((*VertEvent->w_GeV),2))-Power(neutron_mass_gev,2);
+  ff /= 2*neutron_mass_gev;
   ff /= *(VertEvent->qsq_GeV);
-  ff /= 2*(1-this->epsilon());
-  ff /= neutron_mass_gev;
+  ff /= (1-this->epsilon());
   return ff;
 }
 
-double SigmaCalc::fluxfactor_rf()
-{
-  double ff = alpha/(2*Power(Pi(),2));
-  ff *= (RestEvent->ScatElec->E())/(RestEvent->BeamElec->E());
-  ff *= (Power(*(VertEvent->w_GeV),2) - Power(proton_mass_gev,2));
-  ff /= 2*(1-this->epsilon());
-  ff /= neutron_mass_gev;
-  ff /= *VertEvent->qsq_GeV;
-}
 
 double SigmaCalc::jacobian_cm()
 {
@@ -240,15 +259,26 @@ double SigmaCalc::jacobian_cm()
 
 double SigmaCalc::jacobian_cm_col()
 {
-  double jcol = Power(VertEvent->ProdPion->P(),2)*(*VertEvent->w_GeV)*1000;
+  double jcol = Power(VertEvent->ProdPion->P(),2)*(*VertEvent->w_GeV*1000);
   jcol /= (CofMEvent->ProdPion->P()
            * Abs((neutron_mass_mev+VertEvent->VirtPhot->E())
                  * VertEvent->ProdPion->P()
                  - (VertEvent->ProdPion->E()*VertEvent->VirtPhot->P()
-                    * Cos((Pi()/180)*VertEvent->ProdPion->Theta()
-                          )
+                    * Cos(VertEvent->ProdPion->Theta())
                     )
                  )
            );
   return jcol;
+}
+
+double SigmaCalc::PSF()
+{
+  double psf = (obj["scat_elec_Emax"].asDouble()-obj["scat_elec_Emin"].asDouble())/1000;
+  psf *= (Sin(obj["scat_elec_thetamax"].asDouble()/DEG)
+          -Sin(obj["scat_elec_thetamin"].asDouble()/DEG));
+  psf *= (Sin(obj["prod_pion_thetamax"].asDouble()/DEG)
+          -Sin(obj["prod_pion_thetamin"].asDouble()/DEG));
+  psf *= 4*Pi()*Pi();
+
+  return psf;
 }

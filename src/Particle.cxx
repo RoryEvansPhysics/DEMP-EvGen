@@ -142,6 +142,8 @@ void Particle::SetThetaPhiE(double theta, double phi, double E)
   P->SetMag(Pmag);
 
   this->SetVectM(*P,proper_mass);
+
+  delete P;
 }
 
 void Particle::SetThetaPhiP(double theta, double phi, double P)
@@ -153,6 +155,8 @@ void Particle::SetThetaPhiP(double theta, double phi, double P)
   Pvec->SetMag(Pmag);
 
   this->SetVectM(*Pvec,proper_mass);
+
+  delete Pvec;
 }
 
 

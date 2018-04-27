@@ -1,6 +1,8 @@
 #ifndef DEMPEvent_H
 #define DEMPEvent_H
 
+#include "TLorentzVector.h"
+
 #include "Particle.hxx"
 #include "TVector3.h"
 
@@ -12,6 +14,7 @@ public:
   DEMPEvent(char* prefix);
 
   void Boost(TVector3 boostvect);
+  void Rotate(double rottheta, double rotphi);
   TVector3 CoM();
 
   Particle * BeamElec;
@@ -21,6 +24,8 @@ public:
   Particle * ProdPion;
 
   Particle * VirtPhot;
+
+  TLorentzVector* TargPol;
 
   double* qsq_GeV;
   double* t_GeV;
@@ -40,6 +45,8 @@ public:
   double* Vertex_x;
   double* Vertex_y;
   double* Vertex_z;
+
+  double STphi; //Angle of the target transverse polarization
 
   void Update();
 

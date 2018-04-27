@@ -15,13 +15,14 @@ private:
   double lK, lbetasq, lxi, lhbarwsq, j, Delta_p, lw;
   double result;
   Particle * Pout;
+  double beta, mstheta, msphi, mstheta0;
 
 public:
   double b(double aZ);
   double X0(double aZ, double aA);
-  Particle* MultiScatter(Particle* P, double radlen);
-  Particle* IonLoss(Particle* P, double a, double z, double rho, double t);
-  Particle* BremLoss(Particle* P, double abt);
+  void MultiScatter(Particle* P, double radlen);
+  void IonLoss(Particle* P, double a, double z, double rho, double t);
+  void BremLoss(Particle* P, double abt);
 };
 
 #endif

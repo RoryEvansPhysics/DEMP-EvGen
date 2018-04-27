@@ -41,8 +41,10 @@ GPATH
 
 # ROOT (?) stuff
 *.pcm
+*.root
 
 # misc
 build/
 debug/
+Macros/
 .dir-locals.el

@@ -42,7 +42,7 @@ ProductGen::ProductGen(Particle* inInteraction, Particle* inTarget):
   UnitVect = new TVector3(0,0,1);
   F = new TF1("F",
               "[6]-sqrt([7]**2+x**2)-sqrt([8]**2+([3]-[0]*x)**2+([4]-[1]*x)**2+([5]-[2]*x)**2)",
-              0, 11000);
+              0, 12000);
 
 }
 
@@ -128,17 +128,24 @@ int ProductGen::Solve(double theta, double phi)
   *Proton = *Proton1;
 
   if (TMath::Abs(F->Eval(P)) > 1){
+    delete Pion1;
+    delete Proton1;
     return 1;
   }
 
-  if (!SolnCheck())
+  if (!SolnCheck()){
+    delete Pion1;
+    delete Proton1;
     return 1;
+  }
 
   //Check for Second solution:
   double P2 = F->GetX(0, P+100, pars[6], 0.0001, 10000);
 
   if (TMath::Abs(F->Eval(P2))> 1){
     //No second soln
+    delete Pion1;
+    delete Proton1;
     return 0;
   }
 
@@ -156,11 +163,15 @@ int ProductGen::Solve(double theta, double phi)
   if (SolnCheck()){
     //Toss a coin
     if (CoinToss->Uniform(0,1)>0.5){
+      delete Pion1;
+      delete Pion2;
+      delete Proton1;
+      delete Proton2;
       return 0; // Keep second solution
     }
   }
 
-  //Either SolnCheck or coint toss failed
+  //Either SolnCheck or coin toss failed
   //Revert to original solution
 
   *Proton = *Proton1;

@@ -12,11 +12,13 @@ public:
   //SigmaCalc(DEMPEvent* in_Event);
   SigmaCalc(DEMPEvent* in_VertEvent,
             DEMPEvent* in_CofMEvent,
-            DEMPEvent* in_RestEvent);
+            DEMPEvent* in_RestEvent,
+            DEMPEvent* in_TConEvent);
 
   DEMPEvent* VertEvent;
   DEMPEvent* CofMEvent;
   DEMPEvent* RestEvent;
+  DEMPEvent* TConEvent;
 
   vector<Asymmetry*>* Asyms;
 
@@ -31,7 +33,6 @@ public:
   double sigma_ut();
 
   double fluxfactor_col();
-  double fluxfactor_rf();
 
   double jacobian_cm();
   double jacobian_cm_col();
@@ -41,6 +42,8 @@ public:
   double epsilon();
 
   double weight(int nGen);
+
+  double PSF();
 };
 
 

@@ -19,20 +19,21 @@ namespace constants{
   const double pion_mass_gev = 139.57/1000;
   const double neutron_mass_gev =  939.565/1000;
 
-  const double DEG = 180/TMath::Pi();
+  const double DEG = 180.0/TMath::Pi();
 
   const int pid_pion = -211;
   const int pid_prot = 2212;
   const int pid_elec = 11;
   const int pid_neut = 0;
 
-  const double EBeam = 11000;
-  const double PSF = (EBeam*0.9-EBeam*0.1)
-    * (28.0-5.0)/DEG * 2*TMath::Pi()
-    *(EBeam*0.9-EBeam*0.1)
-    * (60.0-0.0)/DEG * 2*TMath::Pi();
+  //const double EBeam = 11000;
+  //const double PSF = ((EBeam*0.9-EBeam*0.1)/1000)
+  //  * (28.0-5.0)/DEG * 2*TMath::Pi()
+  //  *((EBeam*0.9-EBeam*0.1)/1000)
+  //  * (60.0-0.0)/DEG * 2*TMath::Pi();
   const double Lumi = 1.0e36;
-  const double nBcm2 = 1e-33;
+  const double nBcm2 = 1.0e-33;
+  const double uBcm2 = 1.0e-30;
 
   const double alpha = 1.0/137.0;
 

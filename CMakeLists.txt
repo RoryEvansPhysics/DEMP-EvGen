@@ -15,8 +15,10 @@ include(${ROOT_USE_FILE})
 
 include_directories(include)
 include_directories(${ROOT_INCLUDE_DIRS})
+#include_directories(include/json)
 
-file(GLOB SOURCES "src/*.cxx")
+file(GLOB SOURCES "src/*")
+# file(GLOB SOURCES "src/*.cpp")
 
 message("Root Include Dirs: " ${ROOT_INCLUDE_DIRS})
 message("Root Libraries: " ${ROOT_LIBRARIES})

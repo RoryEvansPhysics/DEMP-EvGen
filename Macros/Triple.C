@@ -6,7 +6,7 @@
 void Triple()
 {
   gStyle->SetOptStat(0);
-  TFile * f1 = new TFile("../build/Output.root");
+  TFile * f1 = new TFile("../build/NoEffects.root");
   TTree * t1 = (TTree*)f1->Get("Output");
 
   TCut ElecTheta = "VertScatElec_theta>8 && VertScatElec_theta<24";
@@ -29,6 +29,8 @@ void Triple()
     && ProtMom
     && W;
 
+  TCut Q = "qsq_GeV>4";
+
   TCut Weight = "weight";
 
   TCanvas* c1 = new TCanvas("c1","c1");
@@ -46,16 +48,16 @@ void Triple()
 
   c2->cd(1);
   t1->Draw("VertScatElec_P:VertScatElec_theta>>h2(50,8,24,50,3,6)",
-           Weight*Coin, "colz");
+           Weight*(Coin&&Q), "colz");
 
   c2->cd(2);
   t1->Draw("VertProdPion_P:VertProdPion_theta>>h3(50,8,24,50,4.5,8)",
-           Weight*Coin, "colz");
+           Weight*(Coin&&Q), "colz");
 
   c2->cd(3);
 
   t1->Draw("VertProdProt_P:VertProdProt_theta>>h4(50,8,24,50,0.1,2)",
-           Weight*Coin,"colz");
+           Weight*(Coin&&Q),"colz");
 
   gPad -> SetLogz();
 }

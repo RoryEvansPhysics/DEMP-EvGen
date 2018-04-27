@@ -28,13 +28,13 @@ TargetGen::TargetGen(double mass_in, bool fermi_in)
 
 double TargetGen::FermiMomentum()
 {
-  double fMom;
-  bool kFermi = true;
+  fMom;
+  kFermi = true;
   while ( kFermi ) {
-    double fProton_Rand_Mom_Col      = fRandom->Uniform( 0, 300.0);
-    double fProton_Rand_Mom_Col_Prob = fRandom->Uniform( fProb[300], fProb[0] );
-    int    fProton_Mom_Int           = std::ceil( fProton_Rand_Mom_Col );
-    double f3He_Value                = fProb[ fProton_Mom_Int - 1 ];
+    fProton_Rand_Mom_Col      = fRandom->Uniform( 0, 300.0);
+    fProton_Rand_Mom_Col_Prob = fRandom->Uniform( fProb[300], fProb[0] );
+    fProton_Mom_Int           = std::ceil( fProton_Rand_Mom_Col );
+    f3He_Value                = fProb[ fProton_Mom_Int - 1 ];
 
     if ( fProton_Rand_Mom_Col_Prob <= f3He_Value ) {
       fMom = fProton_Rand_Mom_Col;

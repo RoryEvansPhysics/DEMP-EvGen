@@ -4,10 +4,12 @@
 
 #include "TMath.h"
 #include "TVector3.h"
+#include "TLorentzVector.h"
 
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
+#include "json/json.h"
 
 using namespace constants;
 
@@ -28,6 +30,16 @@ DEMPEvent::DEMPEvent()
   Vertex_y = new double(0);
   Vertex_z = new double(0);
 
+  STphi = TMath::Pi();
+  //std::cout<<STphi<<std::endl;
+
+  extern Json::Value obj;
+
+  TargPol = new TLorentzVector(obj["targ_pol_x"].asDouble(),
+                               obj["targ_pol_y"].asDouble(),
+                               obj["targ_pol_z"].asDouble(),
+                               0);
+
 }
 
 DEMPEvent::DEMPEvent(char* prefix)
@@ -47,33 +59,48 @@ DEMPEvent::DEMPEvent(char* prefix)
   Vertex_y = new double(0);
   Vertex_z = new double(0);
 
+  STphi = TMath::Pi();
+  //std::cout<<STphi<<std::endl;
+
   char be_name[100];
   strcpy(be_name, prefix);
   strcat(be_name, "BeamElec");
   BeamElec = new Particle(electron_mass_mev, be_name, pid_elec);
-  BeamElec->SetName(be_name);
+  BeamElec->SetCharge(-1);
 
   char tn_name[100];
   strcpy(tn_name, prefix);
   strcat(tn_name, "TargNeut");
   TargNeut = new Particle(neutron_mass_mev, tn_name, pid_neut);
+  TargNeut->SetCharge(0);
 
   char se_name[100];
   strcpy(se_name, prefix);
   strcat(se_name, "ScatElec");
   ScatElec = new Particle(electron_mass_mev, se_name, pid_elec);
+  ScatElec->SetCharge(-1);
 
   char ppi_name[100];
   strcpy(ppi_name, prefix);
   strcat(ppi_name, "ProdPion");
   ProdPion = new Particle(pion_mass_mev, ppi_name, pid_pion);
+  ProdPion->SetCharge(-1);
 
   char ppr_name[100];
   strcpy(ppr_name, prefix);
   strcat(ppr_name, "ProdProt");
   ProdProt = new Particle(proton_mass_mev, ppr_name, pid_prot);
+  ProdProt->SetCharge(1);
 
   VirtPhot = new Particle();
+
+  extern Json::Value obj;
+
+  TargPol = new TLorentzVector(obj["targ_pol_x"].asDouble(),
+                               obj["targ_pol_y"].asDouble(),
+                               obj["targ_pol_z"].asDouble(),
+                               0);
+
 }
 
 void DEMPEvent::Update()
@@ -100,11 +127,13 @@ void DEMPEvent::Update()
   *x_B = (*qsq_GeV)*1000000/(2*proton_mass_mev *
                              this->VirtPhot->E());
 
-  *Phi_s = TMath::Pi() - ScatElec->Phi();
+  *Phi_s = TargPol->Phi() - ScatElec->Phi();
 
-  *Phi = ProdPion->Phi() - ScatElec->Phi();
+  *Phi = ProdPion->Phi();
 
-  *Theta = ScatElec->Theta();
+  *Theta = VirtPhot->Theta();
+
+  *P_T = TargPol->Perp(VirtPhot->Vect());
 }
 
 TVector3 DEMPEvent::CoM()
@@ -120,6 +149,9 @@ DEMPEvent DEMPEvent::operator = (const DEMPEvent& q)
   *(this->ProdPion) = *(q.ProdPion);
   *(this->ProdProt) = *(q.ProdProt);
   *(this->VirtPhot) = *(q.VirtPhot);
+  *(this->TargPol) = *(q.TargPol);
+
+  this->STphi = q.STphi;
 }
 
 void DEMPEvent::Boost(TVector3 boostvect)
@@ -133,4 +165,41 @@ void DEMPEvent::Boost(TVector3 boostvect)
   ProdProt->Boost(boostvect);
   ProdPion->Boost(boostvect);
   VirtPhot->Boost(boostvect);
+  TargPol->Boost(boostvect);
+}
+
+void DEMPEvent::Rotate(double rottheta, double rotphi)
+{
+
+  //std::cout << ScatElec->Phi() << std::endl;
+
+  BeamElec->RotateZ(rotphi);
+  TargNeut->RotateZ(rotphi);
+  ScatElec->RotateZ(rotphi);
+  ProdProt->RotateZ(rotphi);
+  ProdPion->RotateZ(rotphi);
+  VirtPhot->RotateZ(rotphi);
+
+  TargPol->RotateZ(rotphi);
+
+  //std::cout << ScatElec->Phi() << std::endl;
+
+  //std::cout<< VirtPhot->Theta()*DEG << std::endl;
+
+  BeamElec->RotateY(rottheta);
+  TargNeut->RotateY(rottheta);
+  ScatElec->RotateY(rottheta);
+  ProdProt->RotateY(rottheta);
+  ProdPion->RotateY(rottheta);
+  VirtPhot->RotateY(rottheta);
+
+  TargPol->RotateY(rottheta);
+
+  //std::cout<< VirtPhot->Theta()*DEG << std::endl;
+
+  //std::cout<<STphi*DEG<<std::endl;
+
+  STphi += rotphi;
+  //std::cout<<STphi*DEG<<std::endl;
+
 }
