@@ -1,6 +1,8 @@
 # DEMP-EvGen
 Event generator for Deep Exclusive Meson Production
 
+
+
 ## Building
 
 To build the event generator, the compiler needs acces to both a compiled installation of CERN ROOT and its source code. ROOT version 6.08.06 or later is supported, and must be installed with the MathMore package enabled. Be sure not to change the location of either the ROOT source or compiled files after installation, as this will interfere with ROOT's built in CMake configurators.
@@ -24,18 +26,50 @@ The event generator can now be run using:
 
 The file Config.json contains all the configuration options. Simply replace the default values as desired and run ./main in your build directory.
 
-## Particle Class
+## Output
+
+The event data is output to Output.root in the build directory. The TTree in this file contains all kinematic data for all particles in the laboratory rest frame. Variables with the prefix "Vert" represent values read at the interaction vertex. Values with the prefix "Lab" represent values read after all correcting effects (multiple scattering, ionization, etc.) have been applied. 
+
+## Sources and Classes
+
+### Particle Class
 
 The Particle class inherits from the root TLorentzVector class so that its functions are immediately accessible through the Particle objects. It's member variables include its mass, charge, and its GEMC compatible id.
 
-## Event Class
+### DEMPEvent Class
 
 The Event class contains all particles of a single event, in one frame of reference. It includes methods enabling transformation to other frames of reference and coordinate systems.
 
-## Asymmetry Class
+### Asymmetry Class
 
 The Asymmetry class calculates asymmetry amplitudes based on Monte-Carlo data by Goloskokov and Kroll. The asymmetry objects are persistent between events.
 
-## Customrand Class
+### Customrand Class
 
 A class to hold various distribution functions for randomly generated variables, such as scattered electron energy. These functions should be persistent between events, and will provide fast random numbers.
+
+### ScatteredParticleGen
+
+Stores the kinematic ranges for the scattered electron and generates them with random energy and direction within the range, using sphere point picking.
+
+### TargetGen
+
+Generates the target neutron with Fermi momentum (when enabled) and proton for FSI (when enabled, may also have Fermi momentum).
+
+### ProductGen
+
+This class reads in the kinematic variables for the incident, target, and scattered particles and uses conservation laws to solve for the remaining two particles. The pion is first given a random direction. A fast root finding algorithm then calculates the pion's momentum magnitude, which is then used to find the proton's momentum. Pion direction may also be passed as an argument for debugging purposes.
+
+### SigmaCalc
+
+This class returns the cross sections and weights for the event. It acts as an interface between the current version of the event generator and header files from the old event generator (seen under branch "original"), which contain the parameterization of the cross sections.
+
+### TreeBuilder
+
+Manages the ROOT TTree object to be stored in the output .root file. Contains methods to easily add all kinematics data stored in a particle or DEMPEvent object. 
+
+## Acknowledgments
+
+###JsonCpp
+
+This project uses [JsonCpp](https://github.com/open-source-parsers/jsoncpp "JsonCpp Github") to read in configuration options. The amalgamated sources for JsonCpp are redistributed with this project in compliance with the MIT license.
