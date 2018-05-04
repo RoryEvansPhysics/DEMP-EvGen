@@ -235,16 +235,16 @@ int main(){
                   Window_Density, targwindowthickness);
       ME->IonLoss(LCorEvent->ScatElec, Helium_A, Helium_Z,
                   Helium_Density, targetthickness);
-      airthickness = 450 * Air_Density / ME->X0(Air_Z,Air_A);
+      airthickness = 450 * Air_Density;
       if (LCorEvent->ScatElec->Theta() < 16) // Large Angle
-        airthickness = 950 * Air_Density / ME->X0(Air_Z,Air_A);
+        airthickness = 950 * Air_Density;
       ME->IonLoss(LCorEvent->ScatElec, Air_A, Air_Z,
                   Air_Density, airthickness);
 
       //Proton
-      airthickness = 450 * Air_Density / ME->X0(Air_Z,Air_A);
+      airthickness = 450 * Air_Density;
       if (LCorEvent->ProdProt->Theta() < 16) // Large Angle
-        airthickness = 950 * Air_Density / ME->X0(Air_Z,Air_A);
+        airthickness = 950 * Air_Density;
 
       ME->IonLoss(LCorEvent->ProdProt, Helium_A, Helium_Z,
                   Helium_Density, targetthickness);
@@ -256,9 +256,9 @@ int main(){
                   Air_Density, airthickness);
 
       //Pion
-      airthickness = 450 * Air_Density / ME->X0(Air_Z,Air_A);
+      airthickness = 450 * Air_Density;
       if (LCorEvent->ProdPion->Theta() < 16) // Large Angle
-        airthickness = 950 * Air_Density / ME->X0(Air_Z, Air_A);
+        airthickness = 950 * Air_Density;
 
       ME->IonLoss(LCorEvent->ProdPion, Helium_A, Helium_Z,
                   Helium_Density, targetthickness);
@@ -274,8 +274,12 @@ int main(){
     if (obj["bremsstrahlung"].asBool()){
 
       //Scattered Electron
-      ME->BremLoss(LCorEvent->ScatElec, targetthickness*ME->b(Helium_Z));
-      ME->BremLoss(LCorEvent->ScatElec, targwindowthickness*ME->b(Window_Z));
+      ME->BremLoss(LCorEvent->ScatElec,
+                   targetthickness*ME->b(Helium_Z)
+                   /ME->X0(Helium_Z, Helium_A));
+      ME->BremLoss(LCorEvent->ScatElec,
+                   targwindowthickness*ME->b(Window_Z)
+                   /ME->X0(Window_Z, Window_A));
       airthickness = 450 * Air_Density / ME->X0(Air_Z, Air_A);
       if (LCorEvent->ScatElec->Theta() < 16) // Large Angle
         airthickness = 950 * Air_Density / ME->X0(Air_Z, Air_A);
@@ -285,24 +289,30 @@ int main(){
 
     if (obj["multiple_scattering"].asBool()){
       //Scattered Electron
-      ME->MultiScatter(LCorEvent->ScatElec, targetthickness);
-      ME->MultiScatter(LCorEvent->ScatElec, targwindowthickness);
+      ME->MultiScatter(LCorEvent->ScatElec,
+                       targetthickness / ME->X0(Helium_Z, Helium_A));
+      ME->MultiScatter(LCorEvent->ScatElec,
+                       targwindowthickness / ME->X0(Window_Z, Window_A));
       airthickness = 450 * Air_Density / ME->X0(Air_Z,Air_A);
       if (LCorEvent->ScatElec->Theta() < 16) // Large Angle
         airthickness = 950 * Air_Density / ME->X0(Air_Z,Air_A);
       ME->MultiScatter(LCorEvent->ScatElec, airthickness);
 
       //Proton
-      ME->MultiScatter(LCorEvent->ProdProt, targetthickness);
-      ME->MultiScatter(LCorEvent->ProdProt, targwindowthickness);
+      ME->MultiScatter(LCorEvent->ProdProt,
+                       targetthickness / ME->X0(Helium_Z, Helium_A));
+      ME->MultiScatter(LCorEvent->ProdProt,
+                       targwindowthickness / ME->X0(Window_Z, Window_A));
       airthickness = 450 * Air_Density / ME->X0(Air_Z,Air_A);
       if (LCorEvent->ProdProt->Theta() < 16) // Large Angle
         airthickness = 950 * Air_Density / ME->X0(Air_Z,Air_A);
       ME->MultiScatter(LCorEvent->ProdProt, airthickness);
 
       //Pion
-      ME->MultiScatter(LCorEvent->ProdPion, targetthickness);
-      ME->MultiScatter(LCorEvent->ProdPion, targwindowthickness);
+      ME->MultiScatter(LCorEvent->ProdPion,
+                       targetthickness / ME->X0(Helium_Z, Helium_A));
+      ME->MultiScatter(LCorEvent->ProdPion,
+                       targwindowthickness / ME->X0(Window_Z, Window_A));
       airthickness = 450 * Air_Density / ME->X0(Air_Z,Air_A);
       if (LCorEvent->ProdPion->Theta() < 16) // Large Angle
         airthickness = 950 * Air_Density / ME->X0(Air_Z,Air_A);
