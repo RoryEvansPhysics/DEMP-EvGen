@@ -18,7 +18,6 @@
 
 //Project includes
 #include "Particle.hxx"
-#include "Frame.hxx"
 #include "CustomRand.hxx"
 #include "ScatteredParticleGen.hxx"
 #include "ProductGen.hxx"
