@@ -26,10 +26,10 @@ class CustomRand
   double Theta();
   double E();
 
-  CustomRand(char * fname,
+  CustomRand(const char * fname,
              double ERange[2], double ThetaRange[2],
              double PhiRange[2]);
-  CustomRand(char * fname,
+  CustomRand(const char * fname,
              double VRange[6]);
 
 

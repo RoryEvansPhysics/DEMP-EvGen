@@ -1,10 +1,12 @@
 # Emacs Stuff #
 *~
 *\#*
+TAGS
 GPATH
 GRTAGS
 GTAGS
 GPATH
+.clang_complete
 
 # Prerequisites
 *.d

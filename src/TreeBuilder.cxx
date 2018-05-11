@@ -10,7 +10,7 @@
 
 using namespace std;
 
-TreeBuilder::TreeBuilder(char * name)
+TreeBuilder::TreeBuilder(const char * name)
 {
   tree_name = name;
   file_name = "Output.root";
@@ -128,7 +128,7 @@ void TreeBuilder::Save()
   //File_Out->Write();
 }
 
-void TreeBuilder::AddDouble(double* x, char* name)
+void TreeBuilder::AddDouble(double* x, const char* name)
 {
   char b_name[100];
   char l_list[100];

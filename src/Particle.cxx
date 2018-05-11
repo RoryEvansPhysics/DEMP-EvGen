@@ -109,6 +109,13 @@ Particle Particle::operator - (const Particle& q)
   return result;
 }
 
+Particle Particle::operator -()
+{
+  Particle result;
+  result.SetVect(-this->Vect());
+  return result;
+}
+
 // PID and Proper_should not change
 // This operator overload makes sure these things stay
 // the same as new particles are generated, and that
@@ -116,6 +123,7 @@ Particle Particle::operator - (const Particle& q)
 Particle Particle::operator = (const Particle& q)
 {
   this->SetPxPyPzE(q.Px(),q.Py(),q.Pz(),q.E());
+  return *this;
 }
 
 double Particle::Pmag()
@@ -165,4 +173,5 @@ Particle::Particle(double m, char* name, int pid_in)
   proper_mass = m;
   pid = pid_in;
   strcpy(identifier, name);
+  this->SetPxPyPzE(0, 0, 0, m);
 }
