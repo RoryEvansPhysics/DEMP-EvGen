@@ -1,4 +1,3 @@
-
 #include "CustomRand.hxx"
 
 #include "TF1.h"
@@ -6,8 +5,12 @@
 #include "TRandom3.h"
 
 #include <stdio.h>
+#include <string.h>
+#include <iostream>
 
-CustomRand::CustomRand(char * fname,
+using namespace std;
+
+CustomRand::CustomRand(const char * fname,
                        double ERange[2],
                        double ThetaRange[2],
                        double PhiRange[2])
@@ -19,14 +22,14 @@ CustomRand::CustomRand(char * fname,
   if(gRandom) delete gRandom;
   gRandom = new TRandom3(0);
 
-  gRandom -> SetSeed(0);
+  gRandom -> SetSeed(seed);
 
-  char PhiName[100] = "Phi_%c";
-  std::sprintf(PhiName, PhiName, fname);
+  char PhiName[100] = "Phi_";
+  strcat(PhiName, fname);
   PhiRand = new TF1(PhiName, "1", PhiRange[0], PhiRange[1]);
 
-  char ThetaName[100] = "Theta_%c";
-  std::sprintf(ThetaName, ThetaName, fname);
+  char ThetaName[100] = "Theta_";
+  strcat(ThetaName, fname);
 
   // ThetaRand = new TF1(ThetaName, "1",
   //                     TMath::Cos(ThetaRange[0]),

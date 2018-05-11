@@ -78,7 +78,7 @@ int ProductGen::Solve()
   double theta = AngleGen->Theta();
   double phi = AngleGen->Phi();
 
-  this->Solve(theta, phi);
+  return this->Solve(theta, phi);
 }
 
 int ProductGen::Solve(double theta, double phi)

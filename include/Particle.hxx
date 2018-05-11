@@ -8,6 +8,8 @@
 #ifndef Particle_H
 #define Particle_H
 
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+
 #include "TLorentzVector.h"
 
 class Particle:public TLorentzVector
@@ -59,6 +61,7 @@ public:
   Particle operator + (const Particle& q);
   Particle operator - (const Particle& q);
   Particle operator = (const Particle& q);
+  Particle operator -();
 
   char * GetName();
   void SetName(char * name);

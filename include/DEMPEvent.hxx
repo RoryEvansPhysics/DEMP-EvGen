@@ -11,7 +11,7 @@ class DEMPEvent
 public:
 
   DEMPEvent();
-  DEMPEvent(char* prefix);
+  DEMPEvent(const char* prefix);
 
   void Boost(TVector3 boostvect);
   void Rotate(double rottheta, double rotphi);

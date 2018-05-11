@@ -1,3 +1,5 @@
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 //C++lib includes
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,6 +29,7 @@
 #include "SigmaCalc.hxx"
 #include "TargetGen.hxx"
 #include "MatterEffects.hxx"
+#include "FSI.hxx"
 
 using namespace std;
 using namespace constants;
@@ -50,10 +53,12 @@ int main(){
     cout << "Fermi Momentum Enabled" << endl;
   if (obj["multiple_scattering"].asBool())
     cout << "Multiple Scattering Enabled" << endl;
+  if (obj["final_state_interaction"].asBool())
+    cout << "FSI Enabled" << endl;
 
 
   MatterEffects* ME = new MatterEffects();
-
+  
 
   int nEvents = obj["n_events"].asInt();
 
@@ -75,6 +80,8 @@ int main(){
   Particle* VertProdProt = VertEvent->ProdProt;
   Particle* Photon = VertEvent->VirtPhot;
 
+  Particle* FSIProt = new Particle(proton_mass_mev, "FSIProt", pid_prot);
+
   VertBeamElec->SetThetaPhiE(0, 0, obj["beam_energy"].asDouble());
 
   double elecERange[2] = {obj["scat_elec_Emin"].asDouble(),
@@ -91,6 +98,8 @@ int main(){
                              elecThetaRange,
                              elecPhiRange);
 
+  FSI* FSIobj = new FSI();
+
   /*
     Particle * Photon = new Particle();
     VertEvent->VirtPhot = Photon;
@@ -99,6 +108,7 @@ int main(){
 
   ProductGen * ProtonPionGen = new ProductGen(Photon,
                                               VertTargNeut);
+
 
   int nSuccess = 0;
   int nFail = 0;
@@ -112,6 +122,9 @@ int main(){
   //Output->AddEvent(CofMEvent);
   //Output->AddEvent(RestEvent);
   Output->AddEvent(LCorEvent);
+
+  if (obj["final_state_interaction"].asBool())
+    Output->AddParticle(FSIProt);
 
   double sigma_l;
   double sigma_t;
@@ -134,7 +147,6 @@ int main(){
   double weight;
   double epsilon;
 
-  double vertexX, vertexY, vertexZ;
   double targetthickness, airthickness, targwindowthickness;
 
   Output -> AddDouble(&sigma_l,"sigma_l");
@@ -215,6 +227,15 @@ int main(){
     *VertEvent->Vertex_y = gRandom->Uniform(-0.25,0.25);
     *VertEvent->Vertex_z = gRandom->Uniform(-370,-330);
 
+    // Final State Interaction.
+    
+    if (obj["final_state_interaction"].asBool()){
+      *FSIobj->VertInPion = *VertProdPion;
+      FSIobj->Generate();
+      *FSIProt = *FSIobj->VertOutProt;
+      *LCorEvent->ProdPion = *FSIobj->VertOutPion;
+    }
+    
 
     //Matter Effects~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

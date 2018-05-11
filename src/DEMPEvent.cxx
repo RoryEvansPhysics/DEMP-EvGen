@@ -42,7 +42,7 @@ DEMPEvent::DEMPEvent()
 
 }
 
-DEMPEvent::DEMPEvent(char* prefix)
+DEMPEvent::DEMPEvent(const char* prefix)
 {
   qsq_GeV = new double(0);
   t_GeV = new double(0);

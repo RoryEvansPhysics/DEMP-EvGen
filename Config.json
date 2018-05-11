@@ -3,7 +3,7 @@
     // All values should use units of MeV for energies and momenta,
     // and degrees for angles.
     // n_events indicates number of attempts, expect approximately 2/3 success rate
-    "n_events" : 1000000,
+    "n_events" : 10000,
     "beam_energy": 11000,
     "targ_pol_x": 0.865,
     "targ_pol_y": 0,
@@ -14,9 +14,9 @@
     "scat_elec_thetamax": 27.0,
     "prod_pion_thetamin": 5.0,
     "prod_pion_thetamax": 20.0,
-    "multiple_scattering": true,
+    "multiple_scattering": false,
     "ionization": false,
     "bremsstrahlung": false,
-    "fsi" : false,
+    "final_state_interaction" : true,
     "fermi_momentum": false
 }
