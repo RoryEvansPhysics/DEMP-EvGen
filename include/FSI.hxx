@@ -17,6 +17,7 @@ private:
 
   double theta_pion, p_pion, phi_pion;
   double a,b,c,x;
+  double Z0,Z1,Z2;
 
   TVector3* CoP;
 public:
