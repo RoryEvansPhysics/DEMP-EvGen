@@ -1,4 +1,5 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 //C++lib includes
 #include <stdio.h>
@@ -82,6 +83,9 @@ int main(){
 
   Particle* FSIProt = new Particle(proton_mass_mev, "FSIProt", pid_prot);
 
+  Particle* InTotal = new Particle();
+  Particle* OutTotal = new Particle();
+
   VertBeamElec->SetThetaPhiE(0, 0, obj["beam_energy"].asDouble());
 
   double elecERange[2] = {obj["scat_elec_Emin"].asDouble(),
@@ -113,6 +117,8 @@ int main(){
   int nSuccess = 0;
   int nFail = 0;
   int nNeg = 0;
+
+  int FSIfail = 0;
 
   int event_status = 0;
 
@@ -167,6 +173,12 @@ int main(){
 
   Output -> AddDouble(&weight,"weight");
   Output -> AddDouble(&epsilon, "epsilon");
+
+  if(obj["final_state_interaction"].asBool()){
+    Output -> AddDouble(FSIobj->WilliamsWeight, "WilliamsWeight");
+    Output -> AddDouble(FSIobj->DedrickWeight, "DedrickWeight");
+    Output -> AddDouble(FSIobj->CatchenWeight, "CatchenWeight");
+  }
 
   cout << "Starting Main Loop." << endl;
 
@@ -231,11 +243,38 @@ int main(){
     
     if (obj["final_state_interaction"].asBool()){
       *FSIobj->VertInPion = *VertProdPion;
-      FSIobj->Generate();
+      FSIfail = FSIobj->Generate();
+      if (FSIfail == 1){
+        cout << "FSI Generation Failure!" << endl;
+        continue;
+      }
       *FSIProt = *FSIobj->VertOutProt;
       *LCorEvent->ProdPion = *FSIobj->VertOutPion;
+      FSIobj -> CalculateWeights();
     }
-    
+
+    // Final Cons Law Check
+
+    *InTotal = (*(LCorEvent->BeamElec)+
+                *(LCorEvent->TargNeut)
+                );
+    *OutTotal = (*(LCorEvent->ScatElec)+
+                 *(LCorEvent->ProdPion)+
+                 *(LCorEvent->ProdProt)
+                 );
+    if (obj["final_state_interaction"].asBool()){
+      *InTotal += *(FSIobj->VertTargProt);
+      *OutTotal += *(FSIobj->VertOutProt);
+    }
+
+    if ((*InTotal-*OutTotal).Px() > 1.0)
+      cout << "Px Violation" << endl;
+    if ((*InTotal-*OutTotal).Py() > 1.0)
+      cout << "Px Violation" << endl;
+    if ((*InTotal-*OutTotal).Pz() > 1.0)
+      cout << "Px Violation" << endl;
+    if ((*InTotal-*OutTotal).E() > 1.0)
+      cout << "Px Violation" << endl;
 
     //Matter Effects~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -346,7 +385,9 @@ int main(){
 
 
     Output->Fill();
+
   }
+
   cout << endl;
 
   if (nSuccess>0)
@@ -387,7 +428,7 @@ int main(){
 
   if(nEvents == -1){
 
-    TFile * Check = new TFile("../data/input/DEMP_Ee_11_Events_100000_File_0.root");
+    TFile * Check = new TFile("../../RootFiles/DEMP_Ee_11_Events_5000000_File_0_Polup_FSI_.root");
     TTree * t1 = (TTree*)Check->Get("t1");
 
     cout << "Running Debug/Check Values" << endl;
@@ -585,6 +626,23 @@ int main(){
 
       sigma = Sig->sigma();
 
+      if (obj["final_state_interaction"].asBool()){
+        *FSIobj->VertInPion = *VertProdPion;
+        FSIobj->VertOutPion -> SetPxPyPzE(Pion_Corrected_MomX_Col_GeV*1000,
+                                          Pion_Corrected_MomY_Col_GeV*1000,
+                                          Pion_Corrected_MomZ_Col_GeV*1000,
+                                          Pion_Corrected_Energy_Col_GeV*1000);
+        //FSIfail = FSIobj->Generate();
+        //if (FSIfail == 1){
+        //  cout << "FSI Generation Failure!" << endl;
+        //  continue;
+        //}
+        FSIobj->GenerateNoRandom();
+        *FSIProt = *FSIobj->VertOutProt;
+        *LCorEvent->ProdPion = *FSIobj->VertOutPion;
+        FSIobj -> CalculateWeights();
+      }
+
       int printw = 20;
 
       cout<<left<<setw(printw)<<"Event:"<<left<<setw(printw)<<i<<endl;
@@ -635,9 +693,14 @@ int main(){
 
       cout<<left<<setw(printw)<< endl;
 
-      cout << "--------------------------------------------------------------------------------------------"<<endl;
       // Sig->Asyms->at(0)->PrintPars();
 
+      cout<<left<<setw(printw)<< endl;
+      cout<<left<<setw(printw)<<"WilliamWeight:"<<left<<setw(printw)<<*FSIobj->WilliamsWeight<<left<<setw(printw)<<WilliamsWeight<<left<<setw(printw)<<endl;
+      cout<<left<<setw(printw)<<"DedrickWeight:"<<left<<setw(printw)<<*FSIobj->DedrickWeight<<left<<setw(printw)<<DedrickWeight<<left<<setw(printw)<<endl;
+      cout<<left<<setw(printw)<<"CatchenWeight:"<<left<<setw(printw)<<*FSIobj->CatchenWeight<<left<<setw(printw)<<CatchenWeight<<left<<setw(printw)<<endl;
+
+      cout << "--------------------------------------------------------------------------------------------"<<endl;
     }
   }
 

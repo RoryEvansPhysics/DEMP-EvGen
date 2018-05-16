@@ -18,6 +18,7 @@ private:
   double theta_pion, p_pion, phi_pion;
   double a,b,c,x;
   double Z0,Z1,Z2;
+  double beta, gamma, beta_pion, g;
 
   TVector3* CoP;
 public:
@@ -34,14 +35,16 @@ public:
 
   double PhaseShiftWeight;
 
-  double WilliamsWeight;
-  double DedrickWeight;
-  double CatchenWeight;
+  double* WilliamsWeight;
+  double* DedrickWeight;
+  double* CatchenWeight;
 
 
   FSI();
 
-  void Generate();
+  int Generate();
+  int CalculateWeights();
+  int GenerateNoRandom();
 
 };
 

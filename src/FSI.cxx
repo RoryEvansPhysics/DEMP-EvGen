@@ -5,7 +5,7 @@
 #include "CustomRand.hxx"
 #include "Particle.hxx"
 #include "Constants.hxx"
-#include 
+#include "PhaseShift.h"
 
 #include <stdio.h>
 #include "json/json.h"
@@ -38,9 +38,13 @@ FSI::FSI()
 
   CMOutPion = new Particle(pion_mass_mev, "", pid_pion);
   CMOutProt = new Particle(proton_mass_mev, "", pid_prot);
+
+  WilliamsWeight = new double(0);
+  DedrickWeight = new double(0);
+  CatchenWeight = new double(0);
 }
 
-void FSI::Generate()
+int FSI::Generate()
 {
 
   *VertTargProt = *ProtGen->GetParticle();
@@ -71,7 +75,7 @@ void FSI::Generate()
   c = Power(proton_mass_mev, 2);
   //cout<<c<<endl;
 
-  x = (Power(a, 4)+Power(b, 2)-2*a*a*b-2*a*a*c-2*b*c)/(4*a*a);
+  x = (a*a*a*a+b*b+c*c-2*a*a*b-2*a*a*c-2*b*c)/(4*a*a);
 
   //cout<<x<<endl;
 
@@ -98,5 +102,95 @@ void FSI::Generate()
  //cout << "Prot z: \t" << CMOutProt->Z()<<endl;
  //cout << "CM E:\t" << CMOutProt->E()<<endl;
  //cout << "Vert E:\t" << VertOutProt->E()<<endl;
+
+  //Check cons laws:
+
+  if (((*CMInPion+*CMTargProt)-(*CMOutProt+*CMOutPion)).Px() > 1.0){
+    cout << "Px: " << ((*CMInPion+*CMTargProt)-(*CMOutProt+*CMOutPion)).Px() << endl;
+    return 1;
+  }
+  if (((*CMInPion+*CMTargProt)-(*CMOutProt+*CMOutPion)).Py() > 1.0){
+    cout << "Py: " << ((*CMInPion+*CMTargProt)-(*CMOutProt+*CMOutPion)).Py() << endl;
+    return 1;
+  }
+  if (((*CMInPion+*CMTargProt)-(*CMOutProt+*CMOutPion)).Pz() > 1.0){
+    cout << "Pz: " << ((*CMInPion+*CMTargProt)-(*CMOutProt+*CMOutPion)).Pz() << endl;
+    return 1;
+  }
+  if (((*CMInPion+*CMTargProt)-(*CMOutProt+*CMOutPion)).E() > 1.0){
+    cout << "E: " << ((*CMInPion+*CMTargProt)-(*CMOutProt+*CMOutPion)).E() << endl;
+      return 1;
+    }
+    else
+      return 0;
+
+}
+
+int FSI::CalculateWeights()
+{
+  phaseshifts(2, CMOutPion->P(), (*CMInPion+*CMTargProt).Mag2());
+
+  Z0 = getZ0();
+  Z1 = getZ1();
+  Z2 = getZ2();
+
+  PhaseShiftWeight = (Z0 +
+                      (Z1 * CMOutPion->Px()/CMOutPion->P()) +
+                      (Z2 * Power(CMOutPion->Px()/CMOutPion->P(), 2))
+                      );
+  PhaseShiftWeight *= 0.012; //.012 nucleons per half of He_3 nucleus area in milli barns
+
+  beta = (VertInPion->P()+VertTargProt->P())/(VertInPion->E()+VertTargProt->E());
+  gamma = (VertInPion->E()+VertTargProt->E()) / (*VertInPion+*VertTargProt).Mag2();
+
+  *WilliamsWeight = PhaseShiftWeight * (VertInPion->Vect().Mag2()/
+                                        (gamma*CMOutPion->P()*
+                                          (VertInPion->P()-beta*VertInPion->E())
+                                          )
+                                        );
+
+  beta_pion = CMOutPion->P() / CMOutPion->E();
+  g = beta / beta_pion;
+
+  *DedrickWeight = PhaseShiftWeight * ((Power
+                                        (Power(g+CMOutPion->CosTheta(), 2)+
+                                         (1 - beta * beta)*
+                                         (1 - Power(CMOutPion->CosTheta(), 2)),
+                                         1.5))/
+                                       ((1-beta*beta)*Abs(1+g*CMOutPion->CosTheta())
+                                        )
+                                       );
+
+  *CatchenWeight = PhaseShiftWeight * (Power(VertInPion->P(),2)*CMOutPion->E()/
+                                       (Power(CMOutPion->P(),2)*VertInPion->E())
+                                       );
+
+  return 0;
+
+}
+
+int FSI::GenerateNoRandom(){
+  //Debug only
+  //For this function, VertInPion and VertOutPion must be specified
+  *VertTargProt = *ProtGen->GetParticle();
+
+  *CMInPion = *VertInPion;
+  *CMTargProt = *VertTargProt;
+
+  *CoP = ((VertInPion->Vect()+VertTargProt->Vect())*
+          (1.0/(VertInPion->E()+VertTargProt->E())));
+
+  CMInPion->Boost(-(*CoP));
+  CMTargProt->Boost(-(*CoP));
+
+  *CMOutPion = *VertOutPion;
+  CMOutPion->Boost(-(*CoP));
+
+  CMOutProt->SetVectM(-(CMOutPion->Vect()), proton_mass_mev);
+
+  *VertOutProt = *CMOutProt;
+  VertOutProt->Boost(*CoP);
+
+  return 0;
 
 }
