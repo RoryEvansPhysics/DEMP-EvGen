@@ -175,6 +175,7 @@ int main(){
   Output -> AddDouble(&epsilon, "epsilon");
 
   if(obj["final_state_interaction"].asBool()){
+    Output -> AddDouble(FSIobj->PhaseShiftWeight, "PhaseShiftWeight");
     Output -> AddDouble(FSIobj->WilliamsWeight, "WilliamsWeight");
     Output -> AddDouble(FSIobj->DedrickWeight, "DedrickWeight");
     Output -> AddDouble(FSIobj->CatchenWeight, "CatchenWeight");
@@ -468,7 +469,7 @@ int main(){
     t1->SetBranchAddress("T_GeV", &T_GeV );
     t1->SetBranchAddress("W_GeV", &W_GeV );
     t1->SetBranchAddress("T_Para_GeV", &T_Para_GeV);
-    t1->SetBranchAddress("T_Prime_GeV", &T_Prime_GeV);
+    //t1->SetBranchAddress("T_Prime_GeV", &T_Prime_GeV);
 
     t1->SetBranchAddress("Qsq_Corrected_GeV", &Qsq_Corrected_GeV );
     t1->SetBranchAddress("T_Corrected_GeV", &T_Corrected_GeV );

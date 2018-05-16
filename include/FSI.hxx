@@ -33,7 +33,7 @@ public:
   Particle* CMOutPion;
   Particle* CMOutProt;
 
-  double PhaseShiftWeight;
+  double* PhaseShiftWeight;
 
   double* WilliamsWeight;
   double* DedrickWeight;

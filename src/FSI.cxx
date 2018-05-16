@@ -128,31 +128,33 @@ int FSI::Generate()
 
 int FSI::CalculateWeights()
 {
-  phaseshifts(2, CMOutPion->P(), (*CMInPion+*CMTargProt).Mag2());
+  phaseshifts(2, CMOutPion->P()/1000, (*CMInPion+*CMTargProt).Mag2()/1000000);
 
   Z0 = getZ0();
   Z1 = getZ1();
   Z2 = getZ2();
 
-  PhaseShiftWeight = (Z0 +
+  *PhaseShiftWeight = (Z0 +
                       (Z1 * CMOutPion->Px()/CMOutPion->P()) +
                       (Z2 * Power(CMOutPion->Px()/CMOutPion->P(), 2))
                       );
-  PhaseShiftWeight *= 0.012; //.012 nucleons per half of He_3 nucleus area in milli barns
+  *PhaseShiftWeight *= 0.012; //.012 nucleons per half of He_3 nucleus area in milli barns
 
   beta = (VertInPion->P()+VertTargProt->P())/(VertInPion->E()+VertTargProt->E());
-  gamma = (VertInPion->E()+VertTargProt->E()) / (*VertInPion+*VertTargProt).Mag2();
+  gamma = (VertInPion->E()+VertTargProt->E()) / (*VertInPion+*VertTargProt).Mag();
 
-  *WilliamsWeight = PhaseShiftWeight * (VertInPion->Vect().Mag2()/
+  *WilliamsWeight = *PhaseShiftWeight * (VertInPion->Vect().Mag2()/
                                         (gamma*CMOutPion->P()*
-                                          (VertInPion->P()-beta*VertInPion->E())
+                                         (VertInPion->P()-(beta*VertInPion->E()*
+                                                           VertInPion->CosTheta())
                                           )
+                                         )
                                         );
 
   beta_pion = CMOutPion->P() / CMOutPion->E();
   g = beta / beta_pion;
 
-  *DedrickWeight = PhaseShiftWeight * ((Power
+  *DedrickWeight = *PhaseShiftWeight * ((Power
                                         (Power(g+CMOutPion->CosTheta(), 2)+
                                          (1 - beta * beta)*
                                          (1 - Power(CMOutPion->CosTheta(), 2)),
@@ -161,7 +163,7 @@ int FSI::CalculateWeights()
                                         )
                                        );
 
-  *CatchenWeight = PhaseShiftWeight * (Power(VertInPion->P(),2)*CMOutPion->E()/
+  *CatchenWeight = *PhaseShiftWeight * (Power(VertInPion->P(),2)*CMOutPion->E()/
                                        (Power(CMOutPion->P(),2)*VertInPion->E())
                                        );
 
