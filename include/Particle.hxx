@@ -48,7 +48,7 @@ public:
   // (i.e. p_this + p_a + P_b = 0
 
 
-  Particle(double m, char* name, int pid_in);
+  Particle(double m, const char* name, int pid_in);
 
   Particle(double m, double px, double py, double pz);
 

@@ -168,7 +168,7 @@ void Particle::SetThetaPhiP(double theta, double phi, double P)
 }
 
 
-Particle::Particle(double m, char* name, int pid_in)
+Particle::Particle(double m, const char* name, int pid_in)
 {
   proper_mass = m;
   pid = pid_in;
