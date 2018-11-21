@@ -140,8 +140,8 @@ int main(){
   //Output->AddEvent(RestEvent);
   Output->AddEvent(LCorEvent);
 
-  if (obj["final_state_interaction"].asBool())
-    Output->AddParticle(FSIProt);
+  //if (obj["final_state_interaction"].asBool())
+  Output->AddParticle(FSIProt);
 
   // These parameters are calculated using multiple reference frames (DEMPEvent objects),
   // and need to be added to the output seperately.
@@ -189,12 +189,12 @@ int main(){
   Output -> AddDouble(&weight,"weight");
   Output -> AddDouble(&epsilon, "epsilon");
 
-  if(obj["final_state_interaction"].asBool()){
-    Output -> AddDouble(FSIobj->PhaseShiftWeight, "PhaseShiftWeight");
-    Output -> AddDouble(FSIobj->WilliamsWeight, "WilliamsWeight");
-    Output -> AddDouble(FSIobj->DedrickWeight, "DedrickWeight");
-    Output -> AddDouble(FSIobj->CatchenWeight, "CatchenWeight");
-  }
+  //if(obj["final_state_interaction"].asBool()){
+  Output -> AddDouble(FSIobj->PhaseShiftWeight, "PhaseShiftWeight");
+  Output -> AddDouble(FSIobj->WilliamsWeight, "WilliamsWeight");
+  Output -> AddDouble(FSIobj->DedrickWeight, "DedrickWeight");
+  Output -> AddDouble(FSIobj->CatchenWeight, "CatchenWeight");
+    //}
 
   cout << "Starting Main Loop." << endl;
   // Main loop of the generator

@@ -17,7 +17,7 @@
     "multiple_scattering": false,
     "ionization": false,
     "bremsstrahlung": false,
-    "final_state_interaction": true,
+    "final_state_interaction": false,
     "fermi_momentum": false
 }
 remote: Total 1 (delta 0), reused 0 (delta 0), pack-reused 0
