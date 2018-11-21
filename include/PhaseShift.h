@@ -1,3 +1,11 @@
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  This file is the C++ adaptation of a Fortran routine for SIMC,
+  parameterizing the cross-sections for pion-nucleon elastic scattering.
+  The adaptation was done by Zafar Ahmed for use in the original DEMP event
+  generator and is included here unmodified.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+
 #include <stdio.h>
 #include <string>
 #include <iostream>

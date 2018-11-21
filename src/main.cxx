@@ -42,6 +42,7 @@ Json::Value obj; //Declared here for global access
 
 int main(){
 
+  // Parsing of config file.
   ifstream ifs("../Config.json");
   Json::Reader reader;
   reader.parse(ifs, obj);
@@ -59,21 +60,31 @@ int main(){
 
 
   MatterEffects* ME = new MatterEffects();
-  
 
   int nEvents = obj["n_events"].asInt();
 
   WorkFile = new TFile("../data/output/test.root");
 
-
+  // Initilization of DEMPEvent objects for different reference frames
   DEMPEvent* VertEvent = new DEMPEvent("Vert");
+  // VertEvent contains particles with kinematic properties at the vertex.
+  // VertEvent is viewed in the laboratory reference frame.
+  // This event is not to be modified after initial generation of the event.
   DEMPEvent* RestEvent = new DEMPEvent("RF");
+  // Event in rest frame of the target neutron.
   DEMPEvent* CofMEvent = new DEMPEvent("CofM");
-  DEMPEvent* TConEvent = new DEMPEvent("TCon"); //Following Trento Conventions.
-  DEMPEvent* LCorEvent = new DEMPEvent("Lab"); //Lab frame with corrections applied
+  // Event in the rest frame of the system's center of mass.
+  DEMPEvent* TConEvent = new DEMPEvent("TCon"); 
+  // Event rotated to follow the Trento Conventions
+  DEMPEvent* LCorEvent = new DEMPEvent("Lab");
+  // LCorEvent is the event after all corrections and effects have been applied,
+  // in the laboratory reference frame.
+
   SigmaCalc* Sig = new SigmaCalc(VertEvent, CofMEvent, RestEvent, TConEvent);
 
-
+  // Retrieval of pointers to particles in VertEvent.
+  // For clarity: these are the same objects as are referenced by VertEvent,
+  // not copies. Operations on these objects affect the original. 
   Particle* VertBeamElec = VertEvent->BeamElec;
   Particle* VertTargNeut = VertEvent->TargNeut;
   Particle* VertScatElec = VertEvent->ScatElec;
@@ -132,6 +143,8 @@ int main(){
   if (obj["final_state_interaction"].asBool())
     Output->AddParticle(FSIProt);
 
+  // These parameters are calculated using multiple reference frames (DEMPEvent objects),
+  // and need to be added to the output seperately.
   double sigma_l;
   double sigma_t;
   double sigma_tt;
@@ -154,6 +167,8 @@ int main(){
   double epsilon;
 
   double targetthickness, airthickness, targwindowthickness;
+
+  targwindowthickness = 0.0120*Window_Density / Window_Thickness;
 
   Output -> AddDouble(&sigma_l,"sigma_l");
   Output -> AddDouble(&sigma_t,"sigma_t");
@@ -182,15 +197,51 @@ int main(){
   }
 
   cout << "Starting Main Loop." << endl;
-
+  // Main loop of the generator
   for (int i=0; i<nEvents; i++){
 
     if (i%100 == 0)
       cout <<"\r"<< (double)i/nEvents * 100 << "%";
+
+    // Generate vertex location
+    *VertEvent->Vertex_x = gRandom->Uniform(-0.25, 0.25);
+    *VertEvent->Vertex_y = gRandom->Uniform(-0.25,0.25);
+    *VertEvent->Vertex_z = gRandom->Uniform(-370,-330);
+
+    // Reset inc. electron to beam energy
+
+    VertBeamElec->SetThetaPhiE(0, 0, obj["beam_energy"].asDouble());
+
+    // Perform matter effects on inc electron
+    // These effects occur before the reaction, so affect the vertex values
+    targetthickness = ((*VertEvent->Vertex_z+370.0) * Helium_Density)/
+      (ME->X0(Helium_Z, Helium_A));
+    if (obj["ionization"].asBool()){
+      ME->IonLoss(VertBeamElec, Window_A, Window_Z, Window_Density, targwindowthickness);
+      ME->IonLoss(VertBeamElec, Helium_A, Helium_Z, Helium_Density, targetthickness);
+    }
+    if (obj["bremsstrahlung"].asBool()){
+      ME->BremLoss(VertBeamElec,
+                   targetthickness*ME->b(Helium_Z)
+                   /ME->X0(Helium_Z, Helium_A));
+      ME->BremLoss(VertBeamElec,
+                   targwindowthickness*ME->b(Window_Z)
+                   /ME->X0(Window_Z, Window_A));
+    }
+    if (obj["multiple_scattering"].asBool()){
+      ME->MultiScatter(VertBeamElec,
+                       targetthickness / ME->X0(Helium_Z, Helium_A));
+      ME->MultiScatter(VertBeamElec,
+                       targwindowthickness / ME->X0(Window_Z, Window_A));
+    }
+
+
+    // Generate target and scattered electron
     *VertTargNeut = *NeutGen->GetParticle();
     *VertScatElec = *ElecGen->GetParticle();
     *Photon = *VertBeamElec - *VertScatElec;
 
+    // Solve for remaining particles
     event_status = ProtonPionGen->Solve();
     if (event_status == 0)
       nSuccess ++;
@@ -204,18 +255,29 @@ int main(){
 
 
     VertEvent->Update();
+    // VertEvent and its components are not to be modified beyond this point.
 
+    // Copy VertEvent and boost to CofM frame.
     *CofMEvent = *VertEvent;
     CofMEvent->Boost(-VertEvent->CoM());
     CofMEvent->Update();
 
+    // Copy VertEvent and boost to rest frame
     *RestEvent = *VertEvent;
     RestEvent->Boost(-(VertEvent->TargNeut->Vect()*(1/VertEvent->TargNeut->E())));
     RestEvent->Update();
 
+    // Copy RestEvent and rotate to Trento coords.
+    *TConEvent = *RestEvent;
+    TConEvent->Rotate(RestEvent->VirtPhot->Theta(),-RestEvent->ScatElec->Phi());
+    TConEvent->Update();
+
+    // Copy VertEvent onto LCorEvent, revert beamelec back to beam value
     *LCorEvent = *VertEvent;
+    LCorEvent->BeamElec->SetThetaPhiE(0, 0, obj["beam_energy"].asDouble());
     LCorEvent->Update();
 
+    // Get cross-sections
     sigma_l = Sig->sigma_l();
     sigma_t = Sig->sigma_t();
     sigma_lt = Sig->sigma_lt();
@@ -236,9 +298,7 @@ int main(){
 
     weight = Sig->weight(nEvents);
 
-    *VertEvent->Vertex_x = gRandom->Uniform(-0.25, 0.25);
-    *VertEvent->Vertex_y = gRandom->Uniform(-0.25,0.25);
-    *VertEvent->Vertex_z = gRandom->Uniform(-370,-330);
+
 
     // Final State Interaction.
     
@@ -247,21 +307,23 @@ int main(){
       FSIfail = FSIobj->Generate();
       if (FSIfail == 1){
         cout << "FSI Generation Failure!" << endl;
+        // No instances of this so far.
         continue;
       }
       *FSIProt = *FSIobj->VertOutProt;
       *LCorEvent->ProdPion = *FSIobj->VertOutPion;
+      //if (FSIfail == 0) cout << "FSI Generation Successful" << endl;
       FSIobj -> CalculateWeights();
     }
 
     // Final Cons Law Check
 
-    *InTotal = (*(LCorEvent->BeamElec)+
-                *(LCorEvent->TargNeut)
+    *InTotal = (*(VertEvent->BeamElec)+
+                *(VertEvent->TargNeut)
                 );
-    *OutTotal = (*(LCorEvent->ScatElec)+
+    *OutTotal = (*(VertEvent->ScatElec)+
                  *(LCorEvent->ProdPion)+
-                 *(LCorEvent->ProdProt)
+                 *(VertEvent->ProdProt)
                  );
     if (obj["final_state_interaction"].asBool()){
       *InTotal += *(FSIobj->VertTargProt);
@@ -283,8 +345,13 @@ int main(){
     targetthickness = ((-330.0 - *VertEvent->Vertex_z) * Helium_Density)/
       (ME->X0(Helium_Z, Helium_A));
     // Assuming path along z only inside the target.
+    // Shape of target is not really being considered here.
+    // A similar approximation is made for through-air distances.
+    // Exact geometry of the detector is not considered, only large angle
+    // or small angle.
+    // If more detailed analysis is desired, geant can do it better.
+    // Turn off effects and use GEMC.
 
-    targwindowthickness = 0.0120*Window_Density / Window_Thickness;
 
     //cout << targetthickness << endl;
 
@@ -425,7 +492,7 @@ int main(){
 
 
 
-  // Debug/Checks:
+  // Checks against old event generator:
 
   if(nEvents == -1){
 

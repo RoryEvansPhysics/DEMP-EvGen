@@ -39,6 +39,8 @@ FSI::FSI()
   CMOutPion = new Particle(pion_mass_mev, "", pid_pion);
   CMOutProt = new Particle(proton_mass_mev, "", pid_prot);
 
+  PhaseShiftWeight = new double(0);
+
   WilliamsWeight = new double(0);
   DedrickWeight = new double(0);
   CatchenWeight = new double(0);
@@ -67,6 +69,7 @@ int FSI::Generate()
   theta_pion = SpherePicker->Theta();
   phi_pion = SpherePicker->Phi();
 
+  // Some factors to simplify the formula
   a = Sqrt(Power(pion_mass_mev, 2)+Power(CMInPion->P(), 2))
     + Sqrt(Power(proton_mass_mev, 2)+Power(CMTargProt->P(), 2));
   //cout<<a<<endl;
@@ -75,6 +78,9 @@ int FSI::Generate()
   c = Power(proton_mass_mev, 2);
   //cout<<c<<endl;
 
+  // Solution to E_i = E_f, taking advantage of the fact that the momenta of
+  // outgoing particles are equal ond opposite in the CoM frame, leving
+  // pion momentum the only unknown.
   x = (a*a*a*a+b*b+c*c-2*a*a*b-2*a*a*c-2*b*c)/(4*a*a);
 
   //cout<<x<<endl;
@@ -130,19 +136,40 @@ int FSI::CalculateWeights()
 {
   phaseshifts(2, CMOutPion->P()/1000, (*CMInPion+*CMTargProt).Mag2()/1000000);
 
+  //cout << CMOutPion->P() << endl;
+  //cout << CMOutPion->Px() << endl;
+
+  //cout << "Check 1" << endl;
+
   Z0 = getZ0();
+  //cout << Z0 << endl;
   Z1 = getZ1();
+  //cout << Z1 << endl;
   Z2 = getZ2();
+  //cout << Z2 << endl;
+
+  //cout << "Check 2" << endl;
+
+  //cout << (Z0 +
+  //        (Z1 * CMOutPion->Px()/CMOutPion->P()) +
+  //        (Z2 * Power(CMOutPion->Px()/CMOutPion->P(), 2))
+  //         ) << endl;
 
   *PhaseShiftWeight = (Z0 +
                       (Z1 * CMOutPion->Px()/CMOutPion->P()) +
                       (Z2 * Power(CMOutPion->Px()/CMOutPion->P(), 2))
                       );
+  //cout << *PhaseShiftWeight << endl;
   *PhaseShiftWeight *= 0.012; //.012 nucleons per half of He_3 nucleus area in milli barns
+
+  //cout << "Check 3" << endl;
 
   beta = (VertInPion->P()+VertTargProt->P())/(VertInPion->E()+VertTargProt->E());
   gamma = (VertInPion->E()+VertTargProt->E()) / (*VertInPion+*VertTargProt).Mag();
 
+  //cout << "Check 4" << endl;
+
+  // Jacobian by W. S. C. Williams
   *WilliamsWeight = *PhaseShiftWeight * (VertInPion->Vect().Mag2()/
                                         (gamma*CMOutPion->P()*
                                          (VertInPion->P()-(beta*VertInPion->E()*
@@ -151,9 +178,16 @@ int FSI::CalculateWeights()
                                          )
                                         );
 
+  //cout << "Check 5" << endl;
+
+
   beta_pion = CMOutPion->P() / CMOutPion->E();
   g = beta / beta_pion;
 
+  //cout << "Check 6" << endl;
+
+
+  // Jacobian by K. G. Dedrick. Rev. Mod. Phys. 34, 429 (1962)
   *DedrickWeight = *PhaseShiftWeight * ((Power
                                         (Power(g+CMOutPion->CosTheta(), 2)+
                                          (1 - beta * beta)*
@@ -163,9 +197,16 @@ int FSI::CalculateWeights()
                                         )
                                        );
 
+  //cout << "Check 8" << endl;
+
+
+  // Jacobian by Gary L. Catchen J. Chem. Phys. 69(4), 15 Aug 1978
   *CatchenWeight = *PhaseShiftWeight * (Power(VertInPion->P(),2)*CMOutPion->E()/
                                        (Power(CMOutPion->P(),2)*VertInPion->E())
                                        );
+
+  //cout << "Check 9" << endl;
+
 
   return 0;
 

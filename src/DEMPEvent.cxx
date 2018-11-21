@@ -136,11 +136,13 @@ void DEMPEvent::Update()
   *P_T = TargPol->Perp(VirtPhot->Vect());
 }
 
+// Calculate and return the center of momentum 3-vector
 TVector3 DEMPEvent::CoM()
 {
   return (BeamElec->Vect() + TargNeut->Vect())*(1/(BeamElec->E()+TargNeut->E()));
 }
 
+// Copy each particle object from another event.
 DEMPEvent DEMPEvent::operator = (const DEMPEvent& q)
 {
   *(this->BeamElec) = *(q.BeamElec);

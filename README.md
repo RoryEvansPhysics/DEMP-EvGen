@@ -68,8 +68,16 @@ This class returns the cross sections and weights for the event. It acts as an i
 
 Manages the ROOT TTree object to be stored in the output .root file. Contains methods to easily add all kinematics data stored in a particle or DEMPEvent object. 
 
+### Matter Effects
+
+Transforms particle kinematics based on three effects caused by transition through matter: Ionization, Bremsstrahlung, and Multiple Scattering. 
+
+### FSI
+
+Computes the effect of final state interaction between the produced pion and one of the two protons of the target nucleus. The momentum of the outgoing pion and recoiled proton, as well as  the cross section of the interaction is calculated based on elastic pion-nucleon scattering.
+
 ## Acknowledgments
 
-###JsonCpp
+### JsonCpp
 
 This project uses [JsonCpp](https://github.com/open-source-parsers/jsoncpp "JsonCpp Github") to read in configuration options. The amalgamated sources for JsonCpp are redistributed with this project in compliance with the MIT license.
