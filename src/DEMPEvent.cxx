@@ -92,6 +92,13 @@ DEMPEvent::DEMPEvent(const char* prefix)
   ProdProt = new Particle(proton_mass_mev, ppr_name, pid_prot);
   ProdProt->SetCharge(1);
 
+  /*
+  char vp_name[100];
+  strcpy(vp_name, prefix);
+  strcat(vp_name, "VirtPhot");
+  ProdProt = new Particle(0, vp_name, pid_prot);
+  ProdProt->SetCharge(0);
+  */
   VirtPhot = new Particle();
 
   extern Json::Value obj;
@@ -105,6 +112,8 @@ DEMPEvent::DEMPEvent(const char* prefix)
 
 void DEMPEvent::Update()
 {
+  *VirtPhot = *BeamElec - *ScatElec;
+
   *qsq_GeV = -(VirtPhot->Mag2())/1000000;
 
   *w_GeV = (*VirtPhot+*TargNeut).Mag()/1000;
@@ -134,6 +143,7 @@ void DEMPEvent::Update()
   *Theta = VirtPhot->Theta();
 
   *P_T = TargPol->Perp(VirtPhot->Vect());
+
 }
 
 // Calculate and return the center of momentum 3-vector

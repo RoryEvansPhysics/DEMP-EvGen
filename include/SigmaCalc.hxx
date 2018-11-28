@@ -36,6 +36,7 @@ public:
 
   double jacobian_cm();
   double jacobian_cm_col();
+  double jacobian_A();
 
   double sigma();
 

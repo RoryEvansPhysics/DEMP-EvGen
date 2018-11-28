@@ -167,7 +167,6 @@ double SigmaCalc::sigma_uu()
 
   double phi = *TConEvent->Phi;
   double eps = this->epsilon();
-
   double siguu = this->sigma_t();
   //cout << siguu << endl;
   siguu += eps*this->sigma_l();
@@ -226,6 +225,7 @@ double SigmaCalc::sigma()
   double sigma = (this->sigma_uu()+sigma_ut());
   sigma *= this->fluxfactor_col();
   sigma *= this->jacobian_cm() * CofMEvent->ProdPion->P() / (1000*Pi());
+  //sigma *= this->jacobian_A();
   sigma *= this->jacobian_cm_col();
   return sigma;
 }
@@ -281,4 +281,8 @@ double SigmaCalc::PSF()
   psf *= 4*Pi()*Pi();
 
   return psf;
+}
+
+double SigmaCalc::jacobian_A(){
+  return CofMEvent->VirtPhot->Vect().Dot(CofMEvent->ProdPion->Vect())/(1000000*Pi());
 }

@@ -7,13 +7,17 @@
 #include <vector>
 #include <stdio.h>
 #include <string.h>
+#include "json/json.h"
 
 using namespace std;
 
 TreeBuilder::TreeBuilder(const char * name)
 {
+
+  extern Json::Value obj;
+
   tree_name = name;
-  file_name = "Output.root";
+  file_name = obj["output_file"].asString().c_str();
 
   File_Out = new TFile(file_name, "RECREATE");
   Tree_Out = new TTree(tree_name, tree_name);
@@ -148,15 +152,18 @@ void TreeBuilder::AddEvent(DEMPEvent * event)
   this->AddParticle(event->ProdProt);
   this->AddParticle(event->ScatElec);
   this->AddParticle(event->TargNeut);
+  //this->AddParticle(event->VirtPhot);
 
+  /*
   this->AddDouble(event->qsq_GeV,"qsq_GeV");
   this->AddDouble(event->w_GeV,"w_GeV");
   this->AddDouble(event->t_GeV,"t_GeV");
   this->AddDouble(event->t_prime_GeV, "t_prime_GeV");
   this->AddDouble(event->x_B, "x_B");
   this->AddDouble(event->negt, "negt");
-
+  
   this->AddDouble(event->Vertex_x,"Vertex_x");
   this->AddDouble(event->Vertex_y,"Vertex_y");
   this->AddDouble(event->Vertex_z,"Vertex_z");
+  */
 }

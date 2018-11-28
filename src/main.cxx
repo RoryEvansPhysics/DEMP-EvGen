@@ -62,6 +62,7 @@ int main(){
   MatterEffects* ME = new MatterEffects();
 
   int nEvents = obj["n_events"].asInt();
+  cout << "Generating "<< nEvents << " events."<<endl;
 
   WorkFile = new TFile("../data/output/test.root");
 
@@ -90,7 +91,9 @@ int main(){
   Particle* VertScatElec = VertEvent->ScatElec;
   Particle* VertProdPion = VertEvent->ProdPion;
   Particle* VertProdProt = VertEvent->ProdProt;
+
   Particle* Photon = VertEvent->VirtPhot;
+  Photon->SetName("VirtPhot");
 
   Particle* FSIProt = new Particle(proton_mass_mev, "FSIProt", pid_prot);
 
@@ -133,7 +136,7 @@ int main(){
 
   int event_status = 0;
 
-  TreeBuilder * Output = new TreeBuilder("Output");
+  TreeBuilder * Output = new TreeBuilder("t1");
 
   Output->AddEvent(VertEvent);
   //Output->AddEvent(CofMEvent);
@@ -142,6 +145,8 @@ int main(){
 
   //if (obj["final_state_interaction"].asBool())
   Output->AddParticle(FSIProt);
+
+  Output->AddParticle(Photon);
 
   // These parameters are calculated using multiple reference frames (DEMPEvent objects),
   // and need to be added to the output seperately.
@@ -177,12 +182,12 @@ int main(){
   Output -> AddDouble(&sigma_uu,"sigma_uu");
   Output -> AddDouble(&sigma_ut,"sigma_ut");
 
-  Output -> AddDouble(&sigma_k0,"sigma_k0");
-  Output -> AddDouble(&sigma_k1,"sigma_k1");
-  Output -> AddDouble(&sigma_k2,"sigma_k2");
-  Output -> AddDouble(&sigma_k3,"sigma_k3");
-  Output -> AddDouble(&sigma_k4,"sigma_k4");
-  Output -> AddDouble(&sigma_k5,"sigma_k5");
+  Output -> AddDouble(&sigma_k0,"AutPhiMinusPhiS");
+  Output -> AddDouble(&sigma_k1,"AutPhiS");
+  Output -> AddDouble(&sigma_k2,"Aut2PhiMinusPhiS");
+  Output -> AddDouble(&sigma_k3,"AutPhiPlusPhiS");
+  Output -> AddDouble(&sigma_k4,"Aut3PhiMinusPhiS");
+  Output -> AddDouble(&sigma_k5,"Aut2PhiPlusPhiS");
 
   Output -> AddDouble(&sigma, "sigma");
 
@@ -195,6 +200,33 @@ int main(){
   Output -> AddDouble(FSIobj->DedrickWeight, "DedrickWeight");
   Output -> AddDouble(FSIobj->CatchenWeight, "CatchenWeight");
     //}
+
+  // Event global variables to add to output
+  Output -> AddDouble(VertEvent->qsq_GeV, "Vert_Qsq_GeV");
+  Output -> AddDouble(VertEvent->w_GeV, "Vert_w_GeV");
+  Output -> AddDouble(VertEvent->t_GeV, "Vert_t_GeV");
+  Output -> AddDouble(VertEvent->t_para_GeV, "Vert_t_para_GeV");
+  Output -> AddDouble(VertEvent->t_prime_GeV, "Vert_t_prime_GeV");
+  Output -> AddDouble(VertEvent->negt, "Vert_negt_GeV");
+  Output -> AddDouble(VertEvent->x_B, "Vert_x_B");
+  Output -> AddDouble(VertEvent->Phi, "Vert_Phi");
+  Output -> AddDouble(VertEvent->Phi_s, "Vert_Phi_s");
+  Output -> AddDouble(VertEvent->Theta, "Vert_Theta");
+
+  Output -> AddDouble(LCorEvent->qsq_GeV, "Lab_Qsq_GeV");
+  Output -> AddDouble(LCorEvent->w_GeV, "Lab_w_GeV");
+  Output -> AddDouble(LCorEvent->t_GeV, "Lab_t_GeV");
+  Output -> AddDouble(LCorEvent->t_para_GeV, "Lab_t_para_GeV");
+  Output -> AddDouble(LCorEvent->t_prime_GeV, "Lab_t_prime_GeV");
+  Output -> AddDouble(LCorEvent->negt, "Lab_negt_GeV");
+  Output -> AddDouble(LCorEvent->x_B, "Lab_x_B");
+  Output -> AddDouble(LCorEvent->Phi, "Lab_Phi");
+  Output -> AddDouble(LCorEvent->Phi_s, "Lab_Phi_s");
+  Output -> AddDouble(LCorEvent->Theta, "Lab_Theta");
+
+  Output -> AddDouble(VertEvent->Vertex_x, "Vertex_x");
+  Output -> AddDouble(VertEvent->Vertex_y, "Vertex_y");
+  Output -> AddDouble(VertEvent->Vertex_z, "Vertex_z");
 
   cout << "Starting Main Loop." << endl;
   // Main loop of the generator
@@ -293,8 +325,11 @@ int main(){
 
     sigma = Sig->sigma();
 
-    if (sigma<0) nNeg ++;
-    //if (sigma<0) continue;
+    if (sigma<0) {
+      nNeg ++;
+      nSuccess --;
+      continue;
+    }
 
     weight = Sig->weight(nEvents);
 
@@ -496,7 +531,9 @@ int main(){
 
   if(nEvents == -1){
 
-    TFile * Check = new TFile("../../RootFiles/DEMP_Ee_11_Events_5000000_File_0_Polup_FSI_.root");
+    int N = 1000;
+
+    TFile * Check = new TFile("../../RootFiles/DEMP_Ee_11_Events_10000_File_0.root");
     TTree * t1 = (TTree*)Check->Get("t1");
 
     cout << "Running Debug/Check Values" << endl;
@@ -626,17 +663,18 @@ int main(){
     t1->SetBranchAddress("Photon_Theta_Col", &Theta);
 
     double Jacobian_CM, Jacobian_CM_RF, Jacobian_CM_Col;
-    double Flux_Factor_RF, Flux_Factor_Col;
+    double Flux_Factor_RF, Flux_Factor_Col, A;
 
     t1->SetBranchAddress("Jacobian_CM",&Jacobian_CM);
     t1->SetBranchAddress("Jacobian_CM_RF",&Jacobian_CM_RF);
     t1->SetBranchAddress("Jacobian_CM_Col",&Jacobian_CM_Col);
+    t1->SetBranchAddress("A", &A);
 
     t1->SetBranchAddress("Flux_Factor_RF",&Flux_Factor_RF);
     t1->SetBranchAddress("Flux_Factor_Col",&Flux_Factor_Col);
 
 
-    for (int i=0; i<10; i++){
+    for (int i=0; i<20; i++){
 
       t1->GetEntry(i);
 
@@ -756,8 +794,12 @@ int main(){
       cout<<left<<setw(printw)<<"Jacobian CM:"<<left<<setw(printw)<<Sig->jacobian_cm()<<left<<setw(printw)<<Jacobian_CM<<endl;
       cout<<left<<setw(printw)<<"Jacobian CM-Col:"<<left<<setw(printw)<<Sig->jacobian_cm_col()<<left<<setw(printw)<<Jacobian_CM_Col<<endl;
       cout<<left<<setw(printw)<<"Flux Factor Col:"<<left<<setw(printw)<<Sig->fluxfactor_col()<<left<<setw(printw)<<Flux_Factor_Col<<endl;
-      cout<<left<<setw(printw)<<"Event Weight:"<<left<<setw(printw)<<Sig->weight(100000)<<left<<setw(printw)<<EventWeight<<left<<setw(printw)<< endl;
+      cout<<left<<setw(printw)<<"A:"<<left<<setw(printw)<<Sig->jacobian_A()<<left<<setw(printw)<<A<<endl;
+      cout<<left<<setw(printw)<<"Event Weight:"<<left<<setw(printw)<<Sig->weight(N)<<left<<setw(printw)<<EventWeight<<left<<setw(printw)<< endl;
       //cout<<left<<setw(printw)<<EventWeight/Sig->weight(100000) << endl;
+      cout<<left<<setw(printw)<< endl;
+
+      cout << (ZASigma_UU+RorySigma_UT)*Flux_Factor_Col*A*Jacobian_CM_Col << endl;
 
       cout<<left<<setw(printw)<< endl;
 
@@ -767,6 +809,7 @@ int main(){
       cout<<left<<setw(printw)<<"WilliamWeight:"<<left<<setw(printw)<<*FSIobj->WilliamsWeight<<left<<setw(printw)<<WilliamsWeight<<left<<setw(printw)<<endl;
       cout<<left<<setw(printw)<<"DedrickWeight:"<<left<<setw(printw)<<*FSIobj->DedrickWeight<<left<<setw(printw)<<DedrickWeight<<left<<setw(printw)<<endl;
       cout<<left<<setw(printw)<<"CatchenWeight:"<<left<<setw(printw)<<*FSIobj->CatchenWeight<<left<<setw(printw)<<CatchenWeight<<left<<setw(printw)<<endl;
+
 
       cout << "--------------------------------------------------------------------------------------------"<<endl;
     }

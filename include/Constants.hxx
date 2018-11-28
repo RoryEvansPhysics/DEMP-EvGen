@@ -25,6 +25,7 @@ namespace constants{
   const int pid_prot = 2212;
   const int pid_elec = 11;
   const int pid_neut = 0;
+  const int pid_phot = 22;
 
   //const double EBeam = 11000;
   //const double PSF = ((EBeam*0.9-EBeam*0.1)/1000)
