@@ -3,8 +3,8 @@
     // All values should use units of MeV for energies and momenta,
     // and degrees for angles.
     // n_events indicates number of attempts, expect approximately 2/3 success rate
-    "output_file" : "RootFiles/PolNeg10M.root",
-    "n_events" : 10000000,
+    "output_file" : "RootFiles/ZhihongTestNeg.root",
+    "n_events" : 1000000,
     "beam_energy": 11000,
     "targ_pol_x": -0.865,
     "targ_pol_y": 0,
@@ -23,3 +23,5 @@
 }
 remote: Total 1 (delta 0), reused 0 (delta 0), pack-reused 0
 Unpacking objects: 100% (1/1), done.
+
+  git config --global user.name "Your Name"

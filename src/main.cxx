@@ -325,7 +325,7 @@ int main(){
 
     sigma = Sig->sigma();
 
-    if (sigma<0) {
+    if (sigma<=0) {
       nNeg ++;
       nSuccess --;
       continue;
