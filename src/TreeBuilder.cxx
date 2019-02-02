@@ -17,7 +17,12 @@ TreeBuilder::TreeBuilder(const char * name)
   extern Json::Value obj;
 
   tree_name = name;
-  file_name = obj["output_file"].asString().c_str();
+  string str_copy = obj["output_file"].asString();
+  file_name = str_copy.c_str();
+
+  cout << obj["output_file"].asString() << endl;
+
+  cout << file_name << endl;
 
   File_Out = new TFile(file_name, "RECREATE");
   Tree_Out = new TTree(tree_name, tree_name);
