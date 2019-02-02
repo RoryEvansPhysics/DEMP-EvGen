@@ -19,6 +19,8 @@ TreeBuilder::TreeBuilder(const char * name)
   tree_name = name;
   file_name = obj["output_file"].asString().c_str();
 
+  cout << file_name <<endl;
+
   File_Out = new TFile(file_name, "RECREATE");
   Tree_Out = new TTree(tree_name, tree_name);
 
