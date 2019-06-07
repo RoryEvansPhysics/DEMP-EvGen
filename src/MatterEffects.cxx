@@ -28,7 +28,7 @@ void MatterEffects::MultiScatter(Particle* P, double radlen)
   //std::cout << mstheta << std::endl;
 
 
-  msphi = 2*Pi()*gRandom->Rndm() - Pi();
+  msphi = Pi()*gRandom->Rndm() - Pi()/2;
 
   Pms->RotateY(mstheta);
   Pms->RotateZ(msphi);

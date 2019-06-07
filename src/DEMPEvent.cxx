@@ -25,6 +25,9 @@ DEMPEvent::DEMPEvent()
   Phi = new double(0);
   Phi_s = new double(0);
   Theta = new double(0);
+  Phi_deg = new double(0);
+  Phi_s_deg = new double(0);
+  Theta_deg = new double(0);
   P_T = new double(0);
   Vertex_x = new double(0);
   Vertex_y = new double(0);
@@ -54,6 +57,9 @@ DEMPEvent::DEMPEvent(const char* prefix)
   Phi = new double(0);
   Phi_s = new double(0);
   Theta = new double(0);
+  Phi_deg = new double(0);
+  Phi_s_deg = new double(0);
+  Theta_deg = new double(0);
   P_T = new double(0);
   Vertex_x = new double(0);
   Vertex_y = new double(0);
@@ -137,12 +143,15 @@ void DEMPEvent::Update()
                              this->VirtPhot->E());
 
   *Phi_s = TargPol->Phi() - ScatElec->Phi();
+  *Phi_s_deg = *Phi_s * DEG;
 
   *Phi = ProdPion->Phi();
+  *Phi_deg = *Phi * DEG;
 
   *Theta = VirtPhot->Theta();
+  *Theta_deg = *Theta * DEG;
 
-  *P_T = TargPol->Perp(VirtPhot->Vect());
+  *P_T = TMath::Abs(TargPol->Perp(VirtPhot->Vect()));
 
 }
 

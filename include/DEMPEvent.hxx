@@ -40,6 +40,10 @@ public:
   double* Phi_s;
   double* Theta;
 
+  double* Phi_deg;
+  double* Phi_s_deg;
+  double* Theta_deg;
+
   double* P_T;
 
   double* Vertex_x;

@@ -24,6 +24,8 @@ TargetGen::TargetGen(double mass_in, bool fermi_in)
 
   fRandom = new TRandom2(0);
 
+  for(int i=0; i<300; i++) fProb[i]/=2;
+
 }
 
 double TargetGen::FermiMomentum()
@@ -32,7 +34,7 @@ double TargetGen::FermiMomentum()
   kFermi = true;
   while ( kFermi ) {
     fProton_Rand_Mom_Col      = fRandom->Uniform( 0, 300.0);
-    fProton_Rand_Mom_Col_Prob = fRandom->Uniform( fProb[300], fProb[0] );
+    fProton_Rand_Mom_Col_Prob = fRandom->Uniform( fProb[299], fProb[0] );
     fProton_Mom_Int           = std::ceil( fProton_Rand_Mom_Col );
     f3He_Value                = fProb[ fProton_Mom_Int - 1 ];
 

@@ -40,10 +40,11 @@ TFile * WorkFile;
 Json::Value obj; //Declared here for global access
 
 
-int main(){
+int main(int argc, char** argv){
 
   // Parsing of config file.
-  ifstream ifs("../Config.json");
+  //ifstream ifs("../Config.json");
+  ifstream ifs(argv[1]);
   Json::Reader reader;
   reader.parse(ifs, obj);
 
@@ -131,6 +132,7 @@ int main(){
   int nSuccess = 0;
   int nFail = 0;
   int nNeg = 0;
+  int nCut = 0;
 
   int FSIfail = 0;
 
@@ -209,9 +211,9 @@ int main(){
   Output -> AddDouble(VertEvent->t_prime_GeV, "Vert_t_prime_GeV");
   Output -> AddDouble(VertEvent->negt, "Vert_negt_GeV");
   Output -> AddDouble(VertEvent->x_B, "Vert_x_B");
-  Output -> AddDouble(VertEvent->Phi, "Vert_Phi");
-  Output -> AddDouble(VertEvent->Phi_s, "Vert_Phi_s");
-  Output -> AddDouble(VertEvent->Theta, "Vert_Theta");
+  Output -> AddDouble(VertEvent->Phi_deg, "Vert_Phi");
+  Output -> AddDouble(VertEvent->Phi_s_deg, "Vert_Phi_s");
+  Output -> AddDouble(VertEvent->Theta_deg, "Vert_Theta");
 
   Output -> AddDouble(LCorEvent->qsq_GeV, "Lab_Qsq_GeV");
   Output -> AddDouble(LCorEvent->w_GeV, "Lab_w_GeV");
@@ -220,9 +222,9 @@ int main(){
   Output -> AddDouble(LCorEvent->t_prime_GeV, "Lab_t_prime_GeV");
   Output -> AddDouble(LCorEvent->negt, "Lab_negt_GeV");
   Output -> AddDouble(LCorEvent->x_B, "Lab_x_B");
-  Output -> AddDouble(LCorEvent->Phi, "Lab_Phi");
-  Output -> AddDouble(LCorEvent->Phi_s, "Lab_Phi_s");
-  Output -> AddDouble(LCorEvent->Theta, "Lab_Theta");
+  Output -> AddDouble(LCorEvent->Phi_deg, "Lab_Phi");
+  Output -> AddDouble(LCorEvent->Phi_s_deg, "Lab_Phi_s");
+  Output -> AddDouble(LCorEvent->Theta_deg, "Lab_Theta");
 
   Output -> AddDouble(VertEvent->Vertex_x, "Vertex_x");
   Output -> AddDouble(VertEvent->Vertex_y, "Vertex_y");
@@ -325,14 +327,58 @@ int main(){
 
     sigma = Sig->sigma();
 
-    if (sigma<=0) {
-      nNeg ++;
-      nSuccess --;
-      continue;
+    epsilon = Sig->epsilon();
+
+
+    // Cuts
+
+    if (obj["Qsq_cut"].asBool()){
+        if (*VertEvent->qsq_GeV<obj["Qsq_min"].asDouble()){
+          nSuccess --;
+          nCut++;
+          continue;
+        }
+      }
+
+    if (obj["w_cut"].asBool()){
+        if (*VertEvent->w_GeV<obj["w_min"].asDouble()){
+          nSuccess --;
+          nCut++;
+          continue;
+        }
+      }
+
+    if (obj["t_cut"].asBool()){
+        if (*VertEvent->t_GeV<obj["t_min"].asDouble()){
+          nSuccess --;
+          nCut++;
+          continue;
+        }
+      }
+
+    if (sigma<=0){
+      //cout << "NEGATIVE EVENT" << endl;
+      nNeg++;
     }
 
-    weight = Sig->weight(nEvents);
+    if (obj["weight_cut"].asBool()){
+      if (sigma<=0) {
+        nSuccess --;
+        // cout << "NEGATIVE EVENT" << endl;
+        // cout << "Sigma_l: \t" << sigma_l << endl;
+        // cout << "Sigma_t: \t" << sigma_t << endl;
+        // cout << "Sigma_lt: \t" << sigma_lt << endl;
+        // cout << "Sigma_tt: \t" << sigma_tt << endl;
+        // cout << "Sigma_uu: \t" << sigma_uu << endl;
+        // cout << "Sigma_ut: \t" << sigma_ut << endl;
+        // cout << "Sigma: \t" << sigma << endl;
+        continue;
+      }
+    }
 
+
+    weight = Sig->weight(nEvents);
+    
 
 
     // Final State Interaction.
@@ -499,7 +545,7 @@ int main(){
   cout << "Successful Events: \t" << nSuccess << endl;
   cout << "Failed Events: \t\t" << nFail << endl;
   cout << "Negative Events: \t\t" << nNeg << endl;
-
+  cout << "Cut Events: \t\t" << nCut << endl;
 
 
 
@@ -529,11 +575,12 @@ int main(){
 
   // Checks against old event generator:
 
-  if(nEvents == -1){
+  if(nEvents <0){
 
-    int N = 1000;
+    int tests = -nEvents;
+    int N = 10000;
 
-    TFile * Check = new TFile("../../RootFiles/DEMP_Ee_11_Events_10000_File_0.root");
+    TFile * Check = new TFile("RootFiles/DEMP_Ee_11_Events_10000_File_0.root");
     TTree * t1 = (TTree*)Check->Get("t1");
 
     cout << "Running Debug/Check Values" << endl;
@@ -674,7 +721,8 @@ int main(){
     t1->SetBranchAddress("Flux_Factor_Col",&Flux_Factor_Col);
 
 
-    for (int i=0; i<20; i++){
+    bool ALERT = false;
+    for (int i=0; i<tests; i++){
 
       t1->GetEntry(i);
 
@@ -751,6 +799,18 @@ int main(){
 
       int printw = 20;
 
+      ALERT = false;
+      if(TMath::Abs((sigma-ZASigma_Lab)/sigma)>0.01) {ALERT = true; cout << "SIGMA:\t"<<TMath::Abs((sigma-ZASigma_Lab)/sigma)<<endl;}
+      if(TMath::Abs((sigma_l-ZASig_L)/sigma_l)>0.01) {ALERT = true; cout << "SIGMA_L:\t"<<TMath::Abs((sigma_l-ZASig_L)/sigma_l)<<endl;}
+      if(TMath::Abs((sigma_t-ZASig_T)/sigma_t)>0.01) {ALERT = true; cout << "SIGMA_T:\t"<<TMath::Abs((sigma_t-ZASig_T)/sigma_t)<<endl;}
+      if(TMath::Abs((sigma_lt-ZASig_LT)/sigma_lt)>0.01) {ALERT = true; cout << "SIGMA_LT:\t"<<TMath::Abs((sigma_lt-ZASig_LT)/sigma_lt)<<endl;}
+      if(TMath::Abs((sigma_tt-ZASig_TT)/sigma_tt)>0.01) {ALERT = true; cout << "SIGMA_TT:\t"<<TMath::Abs((sigma_tt-ZASig_TT)/sigma_tt)<<endl;}
+      if(TMath::Abs((sigma_uu-ZASigma_UU)/sigma_uu)>0.01) {ALERT = true; cout << "SIGMA_UU:\t"<<TMath::Abs((sigma_uu-ZASigma_UU)/sigma_uu)<<endl;}
+      if(TMath::Abs((sigma_ut-RorySigma_UT)/sigma_ut)>0.01) {ALERT = true; cout << "SIGMA_UT:\t"<<TMath::Abs((sigma_ut-RorySigma_UT)/sigma_ut)<<endl;}
+      if(TMath::Abs((Sig->weight(N)-EventWeight)/EventWeight)>0.01) {ALERT = true; cout << "WEIGHT:\t"<<TMath::Abs((Sig->weight(N)-EventWeight)/EventWeight)<<endl;}
+
+      if(ALERT){
+
       cout<<left<<setw(printw)<<"Event:"<<left<<setw(printw)<<i<<endl;
       cout<<left<<setw(printw)<<"Kinematics:"<<endl;
 
@@ -812,6 +872,7 @@ int main(){
 
 
       cout << "--------------------------------------------------------------------------------------------"<<endl;
+      }
     }
   }
 

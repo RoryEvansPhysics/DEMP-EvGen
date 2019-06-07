@@ -79,7 +79,7 @@ int FSI::Generate()
   //cout<<c<<endl;
 
   // Solution to E_i = E_f, taking advantage of the fact that the momenta of
-  // outgoing particles are equal ond opposite in the CoM frame, leving
+  // outgoing particles are equal ond opposite in the CoM frame, leaving
   // pion momentum the only unknown.
   x = (a*a*a*a+b*b+c*c-2*a*a*b-2*a*a*c-2*b*c)/(4*a*a);
 

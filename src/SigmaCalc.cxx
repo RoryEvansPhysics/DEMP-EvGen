@@ -210,7 +210,7 @@ double SigmaCalc::sigma_ut()
   //cout << "sigma_ut2\t"<< sigut << endl;
 
 
-  sigut *= -pt/(Sqrt(1-Power(Sin(theta)*Sin(phi_s),2)));
+  sigut *= pt/(Sqrt(1-Power(Sin(theta)*Sin(phi_s),2)));
   //cout << "sigma_ut3\t"<< sigut << endl;
   sigut *= this->sigma_uu();
 
@@ -284,5 +284,6 @@ double SigmaCalc::PSF()
 }
 
 double SigmaCalc::jacobian_A(){
-  return CofMEvent->VirtPhot->Vect().Dot(CofMEvent->ProdPion->Vect())/(1000000*Pi());
+  //return CofMEvent->VirtPhot->Vect().Dot(CofMEvent->ProdPion->Vect())/(1000000*Pi());
+  return (this->jacobian_cm() * CofMEvent->ProdPion->P() / (1000*Pi()));
 }
