@@ -15,6 +15,8 @@
 #include "TMath.h"
 #include "TRandom3.h"
 
+#include "json/json.h"
+
 using namespace std;
 using namespace constants;
 
@@ -22,9 +24,13 @@ ProductGen::ProductGen(Particle* inInteraction, Particle* inTarget):
   Interaction(inInteraction), Target(inTarget)
 {
 
+  extern Json::Value obj;
+
+
   char AngleGenName[100] = "AngleGen";
   double dummy[2] = {0,1};
-  double ThetaRange[2] = {6*TMath::DegToRad(), 18*TMath::DegToRad()};
+  double ThetaRange[2] = {obj["prod_pion_thetamin"].asDouble()*TMath::DegToRad(),
+                          obj["prod_pion_thetamax"].asDouble()*TMath::DegToRad()};
   double PhiRange[2] = {0, 360*TMath::DegToRad()};
   AngleGen = new CustomRand(AngleGenName, dummy,
                             ThetaRange, PhiRange);
