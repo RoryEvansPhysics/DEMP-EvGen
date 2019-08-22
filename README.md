@@ -19,16 +19,16 @@ make
 The event generator can now be run using:
 
 ```
-./main
+./main <config file>
 ```
 
 ## Configuration
 
-The file Config.json contains all the configuration options. Simply replace the default values as desired and run ./main in your build directory.
+The file Config.json contains all the configuration options. Use this as a template for other configuration files, which may be given as an argument to the event generator.
 
 ## Output
 
-The event data is output to Output.root in the build directory. The TTree in this file contains all kinematic data for all particles in the laboratory rest frame. Variables with the prefix "Vert" represent values read at the interaction vertex. Values with the prefix "Lab" represent values read after all correcting effects (multiple scattering, ionization, etc.) have been applied. 
+The event data is output to the configured file location relative to the build directory. The TTree in this file contains all kinematic data for all particles in the laboratory rest frame. Variables with the prefix "Vert" represent values read at the interaction vertex. Values with the prefix "Lab" represent values read after all correcting effects (multiple scattering, ionization, etc.) have been applied. 
 
 ## Sources and Classes
 
